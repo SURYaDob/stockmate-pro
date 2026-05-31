@@ -1,6 +1,14 @@
 # StockMate Pro — Render Blueprint Configuration
-# Deploy both the backend API and frontend to Render using this file.
+# Deploy backend, frontend, and PostgreSQL database to Render.
 # Learn more: https://render.com/docs/blueprint-spec
+
+databases:
+  # ─── Free PostgreSQL Database ───
+  - name: stockmate-db
+    plan: free
+    region: singapore
+    databaseName: stockmate
+    user: stockmate_user
 
 services:
   # ─── Backend API Service ───
@@ -18,7 +26,9 @@ services:
       - key: PORT
         value: "5000"
       - key: DATABASE_URL
-        sync: false  # Set this from your Aiven MySQL connection string
+        fromDatabase:
+          name: stockmate-db
+          property: connectionString
       - key: JWT_ACCESS_SECRET
         generateValue: true
       - key: JWT_REFRESH_SECRET
