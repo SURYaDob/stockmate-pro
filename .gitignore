@@ -4,7 +4,6 @@ node_modules/
 # Build outputs
 frontend/dist/
 frontend/release/
-frontend/android/app/build/
 
 # IDE
 .idea/
@@ -33,11 +32,6 @@ npm-debug.log*
 
 # Prisma
 backend/prisma/migrations/
-
-# Capacitor (platform-specific, regenerate via cap sync)
-frontend/android/.gradle/
-frontend/android/local.properties
-frontend/ios/
 
 # Test coverage
 coverage/

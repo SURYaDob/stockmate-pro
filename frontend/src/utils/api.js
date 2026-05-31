@@ -1,24 +1,12 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
-// Detect if running in Capacitor (native mobile) vs browser/PWA
-const isCapacitor = typeof window !== 'undefined' && window.Capacitor?.isNative;
-
 // Determine the API base URL:
 // 1. VITE_API_URL env var (set at build time)
-// 2. For Capacitor: use the env var or fall back to local IP placeholder
-// 3. For browser/PWA: use the Vite proxy ('/api')
+// 2. Fall back to Vite proxy ('/api')
 const ENV_API_URL = import.meta.env.VITE_API_URL;
 const getBaseUrl = () => {
-  if (ENV_API_URL) return ENV_API_URL;
-  if (isCapacitor) {
-    // In Capacitor, there's no Vite proxy, so point directly to backend
-    // For development: use your computer's local IP, e.g., http://192.168.1.5:5000
-    // For production: use your hosted backend URL
-    console.warn('[API] Running in Capacitor without VITE_API_URL set. Using relative /api — this will fail if backend is not on the same host.');
-    return '/api';
-  }
-  return '/api';
+  return ENV_API_URL || '/api';
 };
 
 const api = axios.create({
@@ -31,7 +19,7 @@ const api = axios.create({
 
 // Log the API base URL in development
 if (import.meta.env.DEV) {
-  console.log(`[API] Base URL: ${getBaseUrl()} ${isCapacitor ? '(Capacitor)' : '(Browser/PWA)'}`);
+  console.log(`[API] Base URL: ${getBaseUrl()}`);
 }
 
 // Request interceptor - attach token
