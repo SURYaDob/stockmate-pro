@@ -14,7 +14,7 @@ services:
   # ─── Backend API Service ───
   - type: web
     name: stockmate-pro-api
-    env: node
+    runtime: node
     region: singapore
     plan: free
     buildCommand: npm install && npx prisma generate
@@ -53,8 +53,9 @@ services:
         sync: false  # Your sender email address
 
   # ─── Frontend Static Site ───
-  - type: static
+  - type: web
     name: stockmate-pro
+    runtime: static
     region: singapore
     buildCommand: npm run build
     staticPublishPath: ./dist
