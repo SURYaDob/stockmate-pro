@@ -1,0 +1,59 @@
+# StockMate Pro — Render Blueprint Configuration
+# Deploy both the backend API and frontend to Render using this file.
+# Learn more: https://render.com/docs/blueprint-spec
+
+services:
+  # ─── Backend API Service ───
+  - type: web
+    name: stockmate-pro-api
+    env: node
+    region: singapore
+    plan: free
+    buildCommand: npm install && npx prisma generate
+    startCommand: npx prisma migrate deploy && node src/index.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "5000"
+      - key: DATABASE_URL
+        sync: false  # Set this from your Aiven MySQL connection string
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_ACCESS_EXPIRY
+        value: "15m"
+      - key: JWT_REFRESH_EXPIRY
+        value: "7d"
+      - key: FRONTEND_URL
+        sync: false  # Update with your frontend URL after frontend deploys
+      - key: CORS_ORIGINS
+        sync: false  # Add frontend Render URL here (e.g., https://stockmate-pro.onrender.com)
+      - key: SMTP_HOST
+        value: "smtp.gmail.com"
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USER
+        sync: false  # Your Gmail address
+      - key: SMTP_PASS
+        sync: false  # Your Gmail app password
+      - key: EMAIL_FROM
+        sync: false  # Your sender email address
+
+  # ─── Frontend Static Site ───
+  - type: static
+    name: stockmate-pro
+    region: singapore
+    buildCommand: npm run build
+    staticPublishPath: ./dist
+    rootDir: frontend
+    pullRequestPreviewsEnabled: true
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: VITE_API_URL
+        sync: false  # Set to your backend URL, e.g., https://stockmate-pro-api.onrender.com/api

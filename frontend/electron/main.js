@@ -1,0 +1,288 @@
+/**
+ * StockMate Pro — Electron Main Process
+ *
+ * Starts the Express backend as a child process, creates the app window,
+ * and handles lifecycle events. Supports both development and production modes.
+ *
+ * In production, the backend server is forked as a child process and
+ * the built frontend dist is served locally.
+ *
+ * In development, it connects to the Vite dev server.
+ */
+
+const { app, BrowserWindow, dialog, ipcMain } = require('electron');
+const path = require('path');
+const { fork } = require('child_process');
+const http = require('http');
+
+// ─── Configuration ──────────────────────────────────────────────────────────
+
+const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
+
+const BACKEND_PORT = process.env.BACKEND_PORT || 5000;
+const FRONTEND_DEV_PORT = process.env.FRONTEND_DEV_PORT || 3000;
+const BACKEND_START_TIMEOUT = 15000; // 15 seconds max wait for backend
+
+// ─── State ──────────────────────────────────────────────────────────────────
+
+let mainWindow = null;
+let serverProcess = null;
+let isQuitting = false;
+
+// ─── Backend Server Management ──────────────────────────────────────────────
+
+/**
+ * Resolves the path to the backend server entry point.
+ * In packaged mode, the backend is bundled inside the app resources.
+ */
+function getBackendPath() {
+  if (isDev) {
+    return path.join(__dirname, '..', '..', 'backend', 'src', 'index.js');
+  }
+  return path.join(process.resourcesPath, 'backend', 'src', 'index.js');
+}
+
+/**
+ * Starts the Express backend as a forked child process.
+ * Returns a promise that resolves when the server is ready.
+ */
+function startBackend() {
+  return new Promise((resolve, reject) => {
+    const backendPath = getBackendPath();
+    const env = {
+      ...process.env,
+      PORT: String(BACKEND_PORT),
+      NODE_ENV: 'production',
+      // Ensure the backend uses the bundled Prisma schema
+      DATABASE_URL: process.env.DATABASE_URL,
+      JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET || 'stockmate-electron-access-secret',
+      JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET || 'stockmate-electron-refresh-secret',
+      JWT_ACCESS_EXPIRY: '15m',
+      JWT_REFRESH_EXPIRY: '7d',
+      FRONTEND_URL: `http://localhost:${isDev ? FRONTEND_DEV_PORT : BACKEND_PORT + 1}`,
+      BACKEND_URL: `http://localhost:${BACKEND_PORT}`,
+    };
+
+    serverProcess = fork(backendPath, [], {
+      env,
+      stdio: ['pipe', 'pipe', 'pipe', 'ipc'],
+      silent: true,
+    });
+
+    serverProcess.stdout.on('data', (data) => {
+      console.log(`[Backend] ${data.toString().trim()}`);
+    });
+
+    serverProcess.stderr.on('data', (data) => {
+      console.error(`[Backend] ${data.toString().trim()}`);
+    });
+
+    serverProcess.on('error', (err) => {
+      console.error('[Backend] Process error:', err);
+      reject(err);
+    });
+
+    serverProcess.on('exit', (code) => {
+      console.log(`[Backend] Process exited with code ${code}`);
+      serverProcess = null;
+    });
+
+    // Poll until the backend health check passes
+    const startTime = Date.now();
+    const poll = () => {
+      if (isQuitting) return reject(new Error('App quitting'));
+
+      const req = http.get(`http://localhost:${BACKEND_PORT}/api/health`, (res) => {
+        if (res.statusCode === 200) {
+          console.log('[Backend] Server is ready');
+          resolve();
+        } else {
+          retry();
+        }
+      });
+
+      req.on('error', retry);
+      req.setTimeout(2000, () => {
+        req.destroy();
+        retry();
+      });
+    };
+
+    const retry = () => {
+      if (Date.now() - startTime > BACKEND_START_TIMEOUT) {
+        reject(new Error('Backend server failed to start within timeout'));
+        return;
+      }
+      setTimeout(poll, 500);
+    };
+
+    // Give the server a moment to start listening
+    setTimeout(poll, 1500);
+  });
+}
+
+/**
+ * Gracefully stops the backend server.
+ */
+function stopBackend() {
+  if (serverProcess) {
+    try {
+      serverProcess.kill('SIGTERM');
+      // Force kill after 5 seconds if still running
+      setTimeout(() => {
+        if (serverProcess) {
+          try { serverProcess.kill('SIGKILL'); } catch { /* ignore */ }
+        }
+      }, 5000);
+    } catch {
+      // Process already dead
+    }
+    serverProcess = null;
+  }
+}
+
+// ─── Window Management ──────────────────────────────────────────────────────
+
+function createWindow() {
+  mainWindow = new BrowserWindow({
+    width: 1280,
+    height: 800,
+    minWidth: 900,
+    minHeight: 600,
+    icon: path.join(__dirname, '..', 'public', 'icons', 'icon-512x512.svg'),
+    title: 'StockMate Pro',
+    backgroundColor: '#0f172a',
+    show: false,
+    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'default',
+    frame: process.platform === 'darwin' ? true : true,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: false,
+      contextIsolation: true,
+      sandbox: false,
+    },
+  });
+
+  // Load the frontend
+  if (isDev) {
+    // Development: connect to Vite dev server
+    mainWindow.loadURL(`http://localhost:${FRONTEND_DEV_PORT}`);
+    mainWindow.webContents.openDevTools({ mode: 'bottom' });
+  } else {
+    // Production: serve from built dist using Node's built-in http server
+    const fs = require('fs');
+    const serverApp = require('http').createServer((req, res) => {
+      const distPath = path.join(__dirname, '..', 'dist');
+
+      // Determine file path
+      let filePath = path.join(distPath, req.url === '/' ? 'index.html' : req.url);
+
+      // SPA fallback — if file doesn't exist, serve index.html
+      if (!fs.existsSync(filePath)) {
+        filePath = path.join(distPath, 'index.html');
+      }
+
+      // Read and serve the file
+      fs.readFile(filePath, (err, data) => {
+        if (err) {
+          res.writeHead(500);
+          res.end('Internal Server Error');
+          return;
+        }
+
+        // Determine content type
+        const ext = path.extname(filePath);
+        const mimeTypes = {
+          '.html': 'text/html',
+          '.js': 'application/javascript',
+          '.css': 'text/css',
+          '.json': 'application/json',
+          '.svg': 'image/svg+xml',
+          '.png': 'image/png',
+          '.ico': 'image/x-icon',
+          '.webmanifest': 'application/manifest+json',
+        };
+        const contentType = mimeTypes[ext] || 'application/octet-stream';
+
+        res.writeHead(200, { 'Content-Type': contentType });
+        res.end(data);
+      });
+    });
+
+    const servePort = BACKEND_PORT + 1;
+    serverApp.listen(servePort, () => {
+      console.log(`[Frontend] Serving at http://localhost:${servePort}`);
+      mainWindow.loadURL(`http://localhost:${servePort}`);
+    });
+  }
+
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+  });
+
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
+
+  // Prevent multiple windows from navigation events
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('http://localhost') || url.startsWith('https://')) {
+      require('electron').shell.openExternal(url);
+    }
+    return { action: 'deny' };
+  });
+}
+
+// ─── IPC Handlers ───────────────────────────────────────────────────────────
+
+ipcMain.handle('get-app-info', () => ({
+  version: app.getVersion(),
+  name: app.getName(),
+  platform: process.platform,
+  arch: process.arch,
+  electronVersion: process.versions.electron,
+  nodeVersion: process.versions.node,
+  isDev,
+}));
+
+ipcMain.handle('get-backend-url', () => `http://localhost:${BACKEND_PORT}`);
+
+// ─── App Lifecycle ──────────────────────────────────────────────────────────
+
+app.whenReady().then(async () => {
+  try {
+    // Start the backend server in production mode
+    if (!isDev) {
+      await startBackend();
+    }
+    createWindow();
+  } catch (err) {
+    console.error('[Electron] Startup failed:', err);
+    dialog.showErrorBox(
+      'Startup Error',
+      `StockMate Pro failed to start:\n\n${err.message}\n\nPlease check that your database is running and configured correctly.`
+    );
+    app.quit();
+  }
+
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
+  });
+});
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+});
+
+app.on('before-quit', () => {
+  isQuitting = true;
+  stopBackend();
+});
+
+app.on('will-quit', () => {
+  stopBackend();
+});

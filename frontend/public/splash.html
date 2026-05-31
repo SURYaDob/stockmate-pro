@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#8b5cf6" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="StockMate" />
+  <title>StockMate Pro</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding: 24px;
+      color: white;
+    }
+
+    .logo {
+      width: 96px;
+      height: 96px;
+      margin-bottom: 20px;
+      animation: logoFadeIn 0.6s ease-out;
+    }
+
+    .logo svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.2));
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+      animation: fadeInUp 0.6s ease-out 0.2s both;
+    }
+
+    .tagline {
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0.8;
+      letter-spacing: 0.3px;
+      margin-bottom: 48px;
+      animation: fadeInUp 0.6s ease-out 0.3s both;
+    }
+
+    .loader {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: fadeInUp 0.6s ease-out 0.4s both;
+    }
+
+    .loader .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.6);
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+
+    .loader .dot:nth-child(2) { animation-delay: 0.2s; }
+    .loader .dot:nth-child(3) { animation-delay: 0.4s; }
+
+    .loader-text {
+      font-size: 12px;
+      opacity: 0.5;
+      margin-top: 12px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      animation: fadeInUp 0.6s ease-out 0.5s both;
+    }
+
+    @keyframes logoFadeIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.3; }
+      40% { transform: scale(1); opacity: 0.8; }
+    }
+  </style>
+</head>
+<body>
+  <div class="logo">
+    <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+      <defs>
+        <linearGradient id="logoBg" x1="0" y1="0" x2="96" y2="96">
+          <stop offset="0%" stop-color="#a78bfa"/>
+          <stop offset="100%" stop-color="#818cf8"/>
+        </linearGradient>
+      </defs>
+      <rect width="96" height="96" rx="24" fill="url(#logoBg)"/>
+      <g transform="translate(18,18)" fill="none" stroke="white" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="10" y="25" width="40" height="35" rx="4"/>
+        <line x1="10" y1="25" x2="30" y2="35"/>
+        <line x1="50" y1="25" x2="30" y2="35"/>
+        <line x1="30" y1="35" x2="30" y2="60"/>
+        <line x1="10" y1="40" x2="50" y2="40" opacity="0.4"/>
+        <line x1="30" y1="8" x2="30" y2="25"/>
+      </g>
+    </svg>
+  </div>
+  <h1>StockMate</h1>
+  <p class="tagline">Pro</p>
+  <div class="loader">
+    <span class="dot"></span>
+    <span class="dot"></span>
+    <span class="dot"></span>
+  </div>
+  <p class="loader-text">Loading inventory&hellip;</p>
+
+  <script>
+    // Auto-redirect to the main app after the page finishes loading
+    // This allows the splash to show while the React app is being cached/loaded
+    if (window.location.pathname === '/splash.html' || window.location.search.includes('splash')) {
+      // Short timeout to ensure the browser shows this screen
+      setTimeout(function() {
+        window.location.replace('/');
+      }, 2000);
+    }
+  </script>
+</body>
+</html>

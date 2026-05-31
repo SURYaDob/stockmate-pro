@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+frontend/dist/
+frontend/release/
+frontend/android/app/build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+nul
+
+# Environment
+.env
+backend/.env
+frontend/.env
+*.local
+
+# Executables / installers
+*.exe
+*.msi
+
+# Logs
+*.log
+npm-debug.log*
+
+# Prisma
+backend/prisma/migrations/
+
+# Capacitor (platform-specific, regenerate via cap sync)
+frontend/android/.gradle/
+frontend/android/local.properties
+frontend/ios/
+
+# Test coverage
+coverage/

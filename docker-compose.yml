@@ -1,0 +1,93 @@
+# ===========================================
+# StockMate Pro — Docker Compose
+# ===========================================
+# Start with:  docker compose up -d
+# Stop with:   docker compose down
+# View logs:   docker compose logs -f
+# ===========================================
+
+name: stockmate-pro
+
+services:
+  # ---------- MySQL Database ----------
+  mysql:
+    image: mysql:8.0
+    container_name: stockmate-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-stockmate_root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-stockmate_pro}
+      MYSQL_USER: ${MYSQL_USER:-stockmate}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-stockmate_pass}
+    ports:
+      - "${MYSQL_PORT:-3307}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-stockmate_root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    cap_add:
+      - SYS_NICE
+    networks:
+      - stockmate-net
+
+  # ---------- Backend API ----------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: stockmate-backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-5000}:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - DATABASE_URL=mysql://${MYSQL_USER:-stockmate}:${MYSQL_PASSWORD:-stockmate_pass}@mysql:3306/${MYSQL_DATABASE:-stockmate_pro}
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET:-stockmate-jwt-access-secret-change-in-production}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET:-stockmate-jwt-refresh-secret-change-in-production}
+      - JWT_ACCESS_EXPIRY=15m
+      - JWT_REFRESH_EXPIRY=7d
+      - FRONTEND_URL=http://localhost:3000
+      - BACKEND_URL=http://localhost:5000
+      - MAX_FILE_SIZE=5242880
+      - UPLOAD_DIR=./uploads
+      - DEFAULT_GST_RATE=18
+      - STATE_CODE=27
+    volumes:
+      - backend_uploads:/app/uploads
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - stockmate-net
+
+  # ---------- Frontend (nginx) ----------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: stockmate-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    depends_on:
+      - backend
+    networks:
+      - stockmate-net
+
+# ---------- Volumes ----------
+volumes:
+  mysql_data:
+    driver: local
+  backend_uploads:
+    driver: local
+
+# ---------- Networks ----------
+networks:
+  stockmate-net:
+    driver: bridge

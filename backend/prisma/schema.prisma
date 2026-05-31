@@ -1,0 +1,634 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ============ USER & AUTH ============
+
+enum UserRole {
+  ADMIN
+  STORE_MANAGER
+  STAFF
+  ACCOUNTANT
+}
+
+model Branch {
+  id              String            @id @default(uuid())
+  name            String
+  code            String            @unique
+  address         String?
+  phone           String?
+  email           String?
+  gstNumber       String?
+  isActive        Boolean           @default(true)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  users           UserBranch[]
+  branchInventory BranchInventory[]
+  sales           Sale[]
+  purchases       Purchase[]
+  expenses        Expense[]
+  employees       Employee[]
+  stockMovements  StockMovement[]
+  auditLogs       AuditLog[]
+
+  @@index([code])
+  @@index([isActive])
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  phone         String?
+  password      String
+  firstName     String
+  lastName      String
+  role          UserRole  @default(STAFF)
+  avatar        String?
+  isActive      Boolean   @default(true)
+  theme         String    @default("light")
+  language      String    @default("en")
+  otp           String?
+  otpExpiry     DateTime?
+  resetToken    String? @db.Text
+  resetTokenExp DateTime?
+  refreshToken  String? @db.Text
+  lastLogin     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  branches          UserBranch[]
+  sales             Sale[]
+  purchases         Purchase[]
+  expenses          Expense[]
+  employeeLogs      EmployeeAttendance[]
+  notifications     Notification[]
+  notificationPref  NotificationPreference?
+  pushSubscriptions PushSubscription[]
+  createdItems      Inventory[]             @relation("ItemCreatedBy")
+  updatedItems      Inventory[]             @relation("ItemUpdatedBy")
+  stockMovements    StockMovement[]         @relation("StockMovementCreatedBy")
+  auditLogs         AuditLog[]
+
+  @@index([email])
+  @@index([role])
+}
+
+model UserBranch {
+  id        String  @id @default(uuid())
+  userId    String
+  branchId  String
+  isDefault Boolean @default(false)
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, branchId])
+  @@index([userId])
+  @@index([branchId])
+}
+
+// ============ CATEGORY & INVENTORY ============
+
+enum Category {
+  PLUMBING
+  ELECTRICAL
+  PAINTING
+  HARDWARE
+  TOOLS
+  SANITARY
+  SAFETY_EQUIPMENT
+}
+
+enum UnitType {
+  PCS
+  LITERS
+  KG
+  METERS
+  BOXES
+  ROLLS
+  PAIRS
+}
+
+enum GstRate {
+  RATE_0
+  RATE_5
+  RATE_12
+  RATE_18
+  RATE_28
+}
+
+model CategorySetting {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  slug      String   @unique
+  icon      String
+  theme     String
+  accent    String
+  createdAt DateTime @default(now())
+
+  @@index([slug])
+}
+
+model Inventory {
+  id             String    @id @default(uuid())
+  name           String
+  sku            String    @unique
+  barcode        String?
+  category       Category
+  subCategory    String?
+  brand          String?
+  model          String?
+  unitType       UnitType  @default(PCS)
+  currentStock   Int       @default(0)
+  minStock       Int       @default(5)
+  maxStock       Int       @default(100)
+  purchasePrice  Int       @default(0)
+  sellingPrice   Int       @default(0)
+  gstRate        GstRate   @default(RATE_18)
+  expiryDate     DateTime?
+  warrantyMonths Int?
+  location       String?
+  description    String?
+  isActive       Boolean   @default(true)
+  lastMovement   DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  createdById    String
+  updatedById    String?
+
+  images          InventoryImage[]
+  suppliers       ItemSupplier[]
+  saleItems       SaleItem[]
+  purchaseItems   PurchaseItem[]
+  stockMovements  StockMovement[]
+  branchInventory BranchInventory[]
+  createdBy       User              @relation("ItemCreatedBy", fields: [createdById], references: [id])
+  updatedBy       User?             @relation("ItemUpdatedBy", fields: [updatedById], references: [id])
+
+  @@index([sku])
+  @@index([barcode])
+  @@index([category])
+  @@index([name])
+  @@index([isActive])
+  @@index([currentStock])
+  @@index([lastMovement])
+}
+
+model InventoryImage {
+  id        String   @id @default(uuid())
+  url       String
+  isPrimary Boolean  @default(false)
+  itemId    String
+  createdAt DateTime @default(now())
+
+  item Inventory @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@index([itemId])
+}
+
+model BranchInventory {
+  id       String @id @default(uuid())
+  branchId String
+  itemId   String
+  stock    Int    @default(0)
+
+  branch Branch    @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  item   Inventory @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([branchId, itemId])
+  @@index([branchId])
+  @@index([itemId])
+}
+
+model ItemSupplier {
+  id          String  @id @default(uuid())
+  itemId      String
+  supplierId  String
+  isPreferred Boolean @default(false)
+  lastPrice   Int?
+
+  item     Inventory @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  supplier Supplier  @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+
+  @@unique([itemId, supplierId])
+  @@index([itemId])
+  @@index([supplierId])
+}
+
+model StockMovement {
+  id          String   @id @default(uuid())
+  itemId      String
+  branchId    String?
+  type        String
+  quantity    Int
+  reason      String?
+  reference   String?
+  oldStock    Int
+  newStock    Int
+  createdAt   DateTime @default(now())
+  createdById String?
+
+  item      Inventory @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  branch    Branch?   @relation(fields: [branchId], references: [id])
+  createdBy User?     @relation("StockMovementCreatedBy", fields: [createdById], references: [id])
+
+  @@index([itemId])
+  @@index([branchId])
+  @@index([createdAt])
+  @@index([type])
+}
+
+// ============ SUPPLIER ============
+
+model Supplier {
+  id            String   @id @default(uuid())
+  name          String
+  gstNumber     String?  @unique
+  contactPerson String?
+  phone         String
+  email         String?
+  address       String?
+  city          String?
+  state         String?
+  pincode       String?
+  bankName      String?
+  bankAccount   String?
+  bankIfsc      String?
+  paymentTerms  String?
+  creditLimit   Int?
+  outstanding   Int      @default(0)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  items          ItemSupplier[]
+  purchases      Purchase[]
+  supplierLedger SupplierLedger[]
+
+  @@index([name])
+  @@index([phone])
+  @@index([isActive])
+}
+
+model SupplierLedger {
+  id          String   @id @default(uuid())
+  supplierId  String
+  date        DateTime @default(now())
+  type        String
+  amount      Int
+  balance     Int
+  description String?
+  referenceId String?
+  createdAt   DateTime @default(now())
+
+  supplier Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+
+  @@index([supplierId])
+  @@index([date])
+}
+
+// ============ CUSTOMER ============
+
+model Customer {
+  id          String   @id @default(uuid())
+  name        String
+  phone       String
+  email       String?
+  address     String?
+  city        String?
+  state       String?
+  pincode     String?
+  gstNumber   String?
+  creditLimit Int?
+  outstanding Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  sales          Sale[]
+  customerLedger CustomerLedger[]
+
+  @@index([name])
+  @@index([phone])
+  @@index([isActive])
+}
+
+model CustomerLedger {
+  id          String   @id @default(uuid())
+  customerId  String
+  date        DateTime @default(now())
+  type        String
+  amount      Int
+  balance     Int
+  description String?
+  referenceId String?
+  createdAt   DateTime @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@index([date])
+}
+
+// ============ SALES ============
+
+enum PaymentStatus {
+  PENDING
+  PARTIAL
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  UPI
+  CARD
+  BANK_TRANSFER
+  CREDIT
+}
+
+model Sale {
+  id            String        @id @default(uuid())
+  invoiceNo     String        @unique
+  customerId    String?
+  branchId      String
+  userId        String
+  subtotal      Int           @default(0)
+  discountTotal Int           @default(0)
+  gstTotal      Int           @default(0)
+  grandTotal    Int           @default(0)
+  paidAmount    Int           @default(0)
+  balanceAmount Int           @default(0)
+  paymentMethod PaymentMethod @default(CASH)
+  paymentStatus PaymentStatus @default(PENDING)
+  discountType  String?
+  discountValue Int?
+  notes         String?
+  isReturn      Boolean       @default(false)
+  returnOfId    String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  items    SaleItem[]
+  customer Customer?  @relation(fields: [customerId], references: [id])
+  branch   Branch     @relation(fields: [branchId], references: [id])
+  user     User       @relation(fields: [userId], references: [id])
+  returnOf Sale?      @relation("SaleReturn", fields: [returnOfId], references: [id])
+  returns  Sale[]     @relation("SaleReturn")
+
+  @@index([invoiceNo])
+  @@index([customerId])
+  @@index([branchId])
+  @@index([userId])
+  @@index([createdAt])
+  @@index([paymentStatus])
+}
+
+model SaleItem {
+  id         String  @id @default(uuid())
+  saleId     String
+  itemId     String
+  quantity   Int
+  unitPrice  Int
+  discount   Int     @default(0)
+  gstAmount  Int     @default(0)
+  totalPrice Int
+  gstRate    GstRate @default(RATE_18)
+
+  sale Sale      @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  item Inventory @relation(fields: [itemId], references: [id])
+
+  @@index([saleId])
+  @@index([itemId])
+}
+
+// ============ PURCHASE ============
+
+enum PurchaseStatus {
+  DRAFT
+  ORDERED
+  PARTIAL
+  RECEIVED
+  CANCELLED
+}
+
+model Purchase {
+  id              String         @id @default(uuid())
+  poNumber        String         @unique
+  supplierId      String
+  branchId        String
+  userId          String
+  supplierInvoice String?
+  supplierInvDate DateTime?
+  orderDate       DateTime       @default(now())
+  expectedDate    DateTime?
+  status          PurchaseStatus @default(DRAFT)
+  subtotal        Int            @default(0)
+  discountTotal   Int            @default(0)
+  gstTotal        Int            @default(0)
+  grandTotal      Int            @default(0)
+  paidAmount      Int            @default(0)
+  balanceAmount   Int            @default(0)
+  paymentStatus   PaymentStatus  @default(PENDING)
+  notes           String?
+  isReturn        Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  items    PurchaseItem[]
+  supplier Supplier       @relation(fields: [supplierId], references: [id])
+  branch   Branch         @relation(fields: [branchId], references: [id])
+  user     User           @relation(fields: [userId], references: [id])
+
+  @@index([poNumber])
+  @@index([supplierId])
+  @@index([branchId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model PurchaseItem {
+  id          String  @id @default(uuid())
+  purchaseId  String
+  itemId      String
+  quantity    Int
+  receivedQty Int     @default(0)
+  unitPrice   Int
+  discount    Int     @default(0)
+  gstAmount   Int     @default(0)
+  totalPrice  Int
+  gstRate     GstRate @default(RATE_18)
+
+  purchase Purchase  @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  item     Inventory @relation(fields: [itemId], references: [id])
+
+  @@index([purchaseId])
+  @@index([itemId])
+}
+
+// ============ EMPLOYEE ============
+
+model Employee {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String
+  email     String?
+  role      String
+  branchId  String
+  salary    Int?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  branch     Branch               @relation(fields: [branchId], references: [id])
+  attendance EmployeeAttendance[]
+
+  @@index([branchId])
+  @@index([phone])
+}
+
+model EmployeeAttendance {
+  id          String    @id @default(uuid())
+  employeeId  String
+  userId      String?
+  date        DateTime  @default(now())
+  clockIn     DateTime?
+  clockOut    DateTime?
+  hoursWorked Float?
+  status      String
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  user     User?    @relation(fields: [userId], references: [id])
+
+  @@unique([employeeId, date])
+  @@index([employeeId])
+  @@index([date])
+}
+
+// ============ EXPENSES ============
+
+enum ExpenseCategory {
+  PETTY_CASH
+  UTILITY_BILLS
+  RENT
+  SALARY
+  TRANSPORTATION
+  MAINTENANCE
+  MARKETING
+  OTHER
+}
+
+model Expense {
+  id          String          @id @default(uuid())
+  branchId    String
+  userId      String
+  category    ExpenseCategory
+  amount      Int
+  description String
+  date        DateTime        @default(now())
+  billImage   String?
+  isRecurring Boolean         @default(false)
+  createdAt   DateTime        @default(now())
+
+  branch Branch @relation(fields: [branchId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([branchId])
+  @@index([category])
+  @@index([date])
+}
+
+// ============ PUSH SUBSCRIPTIONS ============
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  userId    String
+  endpoint  String
+  auth      String
+  p256dh    String
+  userAgent String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, endpoint])
+  @@index([userId])
+}
+
+// ============ NOTIFICATIONS ============
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  message   String
+  type      String
+  reference String?
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+}
+
+model NotificationPreference {
+  id             String  @id @default(uuid())
+  userId         String  @unique
+  lowStock       Boolean @default(true)
+  paymentDue     Boolean @default(true)
+  itemExpiry     Boolean @default(true)
+  overduePayment Boolean @default(true)
+  emailNotify    Boolean @default(false)
+  pushNotify     Boolean @default(true)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============ COMPANY PROFILE (for print/PDF templates) ============
+
+model CompanyProfile {
+  id          String   @id @default(uuid())
+  companyName String
+  address     String?
+  phone       String?
+  email       String?
+  gstNumber   String?
+  logoUrl     String?
+  footerText  String   @default("Thank you for your business!")
+  updatedAt   DateTime @updatedAt
+}
+
+// ============ AUDIT ============
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  branchId  String?
+  action    String
+  entity    String
+  entityId  String?
+  oldValue  Json?
+  newValue  Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  user   User?   @relation(fields: [userId], references: [id])
+  branch Branch? @relation(fields: [branchId], references: [id])
+
+  @@index([userId])
+  @@index([branchId])
+  @@index([entity])
+  @@index([entityId])
+  @@index([createdAt])
+  @@index([action])
+}

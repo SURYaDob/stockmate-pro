@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1125" height="2436" viewBox="0 0 1125 2436">
+  <defs>
+    <linearGradient id="splashBg" x1="0" y1="0" x2="1125" y2="2436">
+      <stop offset="0%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#6d28d9"/>
+    </linearGradient>
+  </defs>
+  <rect width="1125" height="2436" fill="url(#splashBg)"/>
+  <g transform="translate(514, 1068)" fill="none" stroke="white" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="-50" y="-70" width="100" height="85" rx="10"/>
+    <line x1="-50" y1="-70" x2="0" y2="-42"/>
+    <line x1="50" y1="-70" x2="0" y2="-42"/>
+    <line x1="0" y1="-42" x2="0" y2="15"/>
+    <line x1="-50" y1="-30" x2="50" y2="-30" opacity="0.4"/>
+    <line x1="0" y1="-115" x2="0" y2="-70"/>
+  </g>
+  <text x="563" y="1300" text-anchor="middle" font-family="-apple-system, system-ui, sans-serif" font-size="46" font-weight="800" fill="white" letter-spacing="-0.5">StockMate</text>
+  <text x="563" y="1360" text-anchor="middle" font-family="-apple-system, system-ui, sans-serif" font-size="18" font-weight="500" fill="rgba(255,255,255,0.6)" letter-spacing="2">Pro</text>
+</svg>

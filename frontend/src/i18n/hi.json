@@ -1,0 +1,57 @@
+{
+  "app": {
+    "name": "स्टॉकमेट प्रो",
+    "tagline": "हार्डवेयर और मेंटेनेंस व्यवसायों के लिए इन्वेंटरी प्रबंधन"
+  },
+  "nav": {
+    "dashboard": "डैशबोर्ड",
+    "inventory": "इन्वेंटरी",
+    "sales": "बिक्री",
+    "purchases": "खरीदारी",
+    "suppliers": "आपूर्तिकर्ता",
+    "customers": "ग्राहक",
+    "reports": "रिपोर्ट्स",
+    "expenses": "खर्च",
+    "employees": "कर्मचारी",
+    "settings": "सेटिंग्स"
+  },
+  "auth": {
+    "login": "लॉग इन",
+    "register": "रजिस्टर",
+    "logout": "लॉग आउट",
+    "email": "ईमेल",
+    "password": "पासवर्ड",
+    "forgotPassword": "पासवर्ड भूल गए?",
+    "resetPassword": "पासवर्ड रीसेट",
+    "selectCategory": "अपनी व्यवसाय श्रेणी चुनें",
+    "loginTo": "स्टॉकमेट प्रो में लॉग इन करें"
+  },
+  "inventory": {
+    "title": "इन्वेंटरी",
+    "addItem": "आइटम जोड़ें",
+    "lowStock": "कम स्टॉक",
+    "name": "आइटम नाम",
+    "sku": "SKU",
+    "category": "श्रेणी",
+    "stock": "स्टॉक"
+  },
+  "common": {
+    "save": "सेव",
+    "cancel": "रद्द करें",
+    "delete": "हटाएं",
+    "edit": "संपादित करें",
+    "search": "खोजें...",
+    "noData": "कोई डेटा नहीं मिला",
+    "loading": "लोड हो रहा है...",
+    "success": "सफल",
+    "error": "त्रुटि",
+    "actions": "कार्रवाइयां"
+  },
+  "dashboard": {
+    "title": "डैशबोर्ड",
+    "totalInventory": "कुल इन्वेंटरी मूल्य",
+    "todaySales": "आज की बिक्री",
+    "lowStockItems": "कम स्टॉक वस्तुएं",
+    "monthlySales": "मासिक बिक्री"
+  }
+}
