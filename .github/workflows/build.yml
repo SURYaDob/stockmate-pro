@@ -76,44 +76,57 @@ jobs:
         working-directory: frontend
         run: npm run build
 
-      - name: Debug build environment
-        working-directory: frontend
-        shell: bash
-        run: |
-          echo "=== Node version ==="
-          node --version
-          echo "=== NPM version ==="
-          npm --version
-          echo "=== electron-builder version ==="
-          npx electron-builder --version
-          echo "=== Dist directory ==="
-          ls -la dist/ || echo "No dist/ directory"
-          echo "=== Public icons ==="
-          ls -la public/icons/ || echo "No icons directory"
-
       - name: Build Electron app
         id: electron-build
         working-directory: frontend
         shell: bash
         run: |
-          ${{ matrix.build-cmd }} 2>&1 || {
-            echo "=== BUILD FAILED — dumping debug info ==="
-            echo "Release directory:"
-            ls -la release/ || true
-            echo "=== package.json build config ==="
-            node -e "const p=JSON.parse(require('fs').readFileSync('package.json','utf8')); console.log(JSON.stringify(p.build, null, 2))"
+          set +e
+          ${{ matrix.build-cmd }} > >(tee /tmp/build-stdout.log) 2> >(tee /tmp/build-stderr.log >&2)
+          BUILD_EXIT=$?
+          set -e
+
+          # Write error log file with all context
+          {
+            echo "=== Build exit code: $BUILD_EXIT ==="
+            echo ""
+            echo "=== STDERR (last 100 lines) ==="
+            tail -100 /tmp/build-stderr.log 2>/dev/null || echo "(no stderr)"
+            echo ""
+            echo "=== STDOUT (last 50 lines) ==="
+            tail -50 /tmp/build-stdout.log 2>/dev/null || echo "(no stdout)"
+            echo ""
+            echo "=== Release directory ==="
+            ls -la release/ 2>/dev/null || echo "(no release dir)"
+            echo ""
+            echo "=== Disk space ==="
+            df -h . 2>/dev/null || true
+            echo ""
+            echo "=== Backend size ==="
+            du -sh ../backend/ 2>/dev/null || true
+            echo ""
+            echo "=== Backend node_modules size ==="
+            du -sh ../backend/node_modules/ 2>/dev/null || true
+          } > /tmp/error-report.txt 2>&1
+
+          if [ $BUILD_EXIT -ne 0 ]; then
+            echo "BUILD FAILED with exit code $BUILD_EXIT"
+            cat /tmp/error-report.txt
             exit 1
-          }
+          fi
+
+          echo "BUILD SUCCEEDED"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEBUG: "electron-builder"
 
-      - name: Upload build output on failure
+      - name: Upload error report on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: build-log-${{ matrix.platform }}
-          path: frontend/release/
-          retention-days: 5
+          name: error-report-${{ matrix.platform }}
+          path: /tmp/error-report.txt
+          retention-days: 30
 
       - name: List release artifacts
         if: success()
