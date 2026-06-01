@@ -88,6 +88,25 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Write error to file and push
+        if: failure()
+        shell: bash
+        run: |
+          mkdir -p ci-errors
+          {
+            echo "## Linux Build Error (${{ matrix.platform }}) - Run ${{ github.run_number }}"
+            echo ""
+            echo '```'
+            cat /tmp/build-output.log 2>/dev/null || echo "(no output)"
+            echo '```'
+          } > "ci-errors/error-${{ matrix.platform }}-run${{ github.run_number }}.md"
+          cat /tmp/build-output.log 2>/dev/null | tail -100 > ci-errors/error-tail.txt 2>/dev/null || true
+          git config user.name "CI Bot"
+          git config user.email "ci-bot@users.noreply.github.com"
+          git add ci-errors/
+          git commit -m "ci: error log for ${{ matrix.platform }} run ${{ github.run_number }}" || true
+          git push origin HEAD:ci-errors || true
+
       - name: Write error summary
         if: failure()
         shell: bash
@@ -99,11 +118,6 @@ jobs:
             echo "### Last 200 lines of output:"
             echo '```'
             tail -200 /tmp/build-output.log 2>/dev/null || echo "(no output captured)"
-            echo '```'
-            echo ""
-            echo "### Release directory:"
-            echo '```'
-            ls -la release/ 2>/dev/null || echo "(no release dir)"
             echo '```'
           } >> $GITHUB_STEP_SUMMARY
 
