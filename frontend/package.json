@@ -110,7 +110,7 @@
           ]
         }
       ],
-      "icon": "public/icons",
+      "icon": "public/icons/icon-512x512.png",
       "category": "Office",
       "artifactName": "${productName}-${version}.${ext}"
     }
