@@ -10,8 +10,6 @@
  * If these are not set, notarization is skipped (useful for local dev builds).
  */
 
-const { notarize } = require('@electron/notarize');
-
 module.exports = async function afterSign(context) {
   const { electronPlatformName, appOutDir } = context;
 
@@ -30,6 +28,15 @@ module.exports = async function afterSign(context) {
       '[afterSign] Skipping notarization — APPLE_ID, APPLE_APP_PASSWORD, or APPLE_TEAM_ID not set.\n' +
       '  To enable notarization, set these environment variables with your Apple Developer credentials.'
     );
+    return;
+  }
+
+  // Lazy require to avoid crashing non-macOS builds if the module isn't resolvable
+  let notarize;
+  try {
+    notarize = require('@electron/notarize').notarize;
+  } catch (err) {
+    console.error(`[afterSign] Cannot load @electron/notarize: ${err.message}`);
     return;
   }
 

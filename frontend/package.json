@@ -23,7 +23,7 @@
   },
   "publish": {
     "provider": "github",
-    "owner": "stockmate",
+    "owner": "SURYaDob",
     "repo": "stockmate-pro",
     "releaseType": "release"
   },
