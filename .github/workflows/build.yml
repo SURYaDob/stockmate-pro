@@ -17,15 +17,15 @@ jobs:
         include:
           - os: windows-latest
             platform: win
-            build_script: electron:build:win
           - os: macos-latest
             platform: mac
-            build_script: electron:build:mac
           - os: ubuntu-latest
             platform: linux
-            build_script: electron:build:linux
 
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
 
     steps:
       - name: Checkout repository
@@ -62,17 +62,7 @@ jobs:
 
       - name: Build Electron app
         working-directory: frontend
-        run: |
-          npx electron-builder --${{ matrix.platform }} 2>&1 || {
-            echo "electron-builder failed with exit code $?"
-            echo "--- Debug info ---"
-            echo "Platform: ${{ matrix.platform }}"
-            echo "Node version: $(node --version)"
-            echo "npm version: $(npm --version)"
-            ls -la release/ 2>/dev/null || echo "No release dir"
-            ls -la dist/ 2>/dev/null || echo "No dist dir"
-            exit 1
-          }
+        run: npx electron-builder --${{ matrix.platform }} --publish never
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CSC_LINK: ${{ secrets.MAC_CERT_P12 }}

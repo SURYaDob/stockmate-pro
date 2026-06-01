@@ -21,15 +21,15 @@
     "electron:build:linux": "npm run build && electron-builder --linux",
     "electron:start": "electron ."
   },
-  "publish": {
-    "provider": "github",
-    "owner": "SURYaDob",
-    "repo": "stockmate-pro",
-    "releaseType": "release"
-  },
   "build": {
     "appId": "com.stockmate.pro",
     "productName": "StockMate Pro",
+    "publish": {
+      "provider": "github",
+      "owner": "SURYaDob",
+      "repo": "stockmate-pro",
+      "releaseType": "release"
+    },
     "directories": {
       "output": "release"
     },
