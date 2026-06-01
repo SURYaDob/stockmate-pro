@@ -81,51 +81,38 @@ jobs:
         working-directory: frontend
         shell: bash
         run: |
-          set +e
-          ${{ matrix.build-cmd }} > >(tee /tmp/build-stdout.log) 2> >(tee /tmp/build-stderr.log >&2)
-          BUILD_EXIT=$?
-          set -e
-
-          # Write error log file with all context
-          {
-            echo "=== Build exit code: $BUILD_EXIT ==="
-            echo ""
-            echo "=== STDERR (last 100 lines) ==="
-            tail -100 /tmp/build-stderr.log 2>/dev/null || echo "(no stderr)"
-            echo ""
-            echo "=== STDOUT (last 50 lines) ==="
-            tail -50 /tmp/build-stdout.log 2>/dev/null || echo "(no stdout)"
-            echo ""
-            echo "=== Release directory ==="
-            ls -la release/ 2>/dev/null || echo "(no release dir)"
-            echo ""
-            echo "=== Disk space ==="
-            df -h . 2>/dev/null || true
-            echo ""
-            echo "=== Backend size ==="
-            du -sh ../backend/ 2>/dev/null || true
-            echo ""
-            echo "=== Backend node_modules size ==="
-            du -sh ../backend/node_modules/ 2>/dev/null || true
-          } > /tmp/error-report.txt 2>&1
-
-          if [ $BUILD_EXIT -ne 0 ]; then
-            echo "BUILD FAILED with exit code $BUILD_EXIT"
-            cat /tmp/error-report.txt
-            exit 1
-          fi
-
-          echo "BUILD SUCCEEDED"
+          ${{ matrix.build-cmd }} 2>&1 | tee /tmp/build-output.log
+          EXIT_CODE=${PIPESTATUS[0]}
+          echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
+          exit $EXIT_CODE
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DEBUG: "electron-builder"
 
-      - name: Upload error report on failure
+      - name: Write error summary
+        if: failure()
+        shell: bash
+        working-directory: frontend
+        run: |
+          {
+            echo "## ❌ Build Failed (${{ matrix.platform }})"
+            echo ""
+            echo "### Last 200 lines of output:"
+            echo '```'
+            tail -200 /tmp/build-output.log 2>/dev/null || echo "(no output captured)"
+            echo '```'
+            echo ""
+            echo "### Release directory:"
+            echo '```'
+            ls -la release/ 2>/dev/null || echo "(no release dir)"
+            echo '```'
+          } >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload build output on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: error-report-${{ matrix.platform }}
-          path: /tmp/error-report.txt
+          name: build-output-${{ matrix.platform }}
+          path: /tmp/build-output.log
           retention-days: 30
 
       - name: List release artifacts
