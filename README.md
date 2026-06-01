@@ -1,8 +1,36 @@
 # StockMate Pro — Desktop Application
 
+> **Version 2.0.0** | Built June 2026
+
 **Complete inventory management for hardware, construction, and maintenance businesses.**
 
 StockMate Pro is a cross-platform desktop application built with **Electron**, **React**, **Express.js**, and **SQLite**. It runs entirely on your local machine with no external database server required — your data stays on your computer.
+
+---
+
+## 📦 For Clients — Quick Install
+
+### System Requirements
+- **OS**: Windows 10/11 (64-bit)
+- **RAM**: 4 GB minimum
+- **Disk**: 200 MB free space
+- **Node.js**: Not required (self-contained installer)
+
+### Installation Steps
+1. Download `StockMate Pro-Setup-2.0.0.exe` from the `frontend/release/` folder
+2. Double-click the installer → follow the setup wizard
+3. Launch StockMate Pro from your desktop or Start Menu
+4. Log in with the default credentials below
+
+> See [Default Login Credentials](#default-login-credentials) below for all roles.
+
+> ⚠️ **Change the default passwords immediately after first login.**
+
+### What Gets Installed
+- The app installs to your chosen directory
+- Your data is stored locally — see [App Data Location](#app-data-location) for paths
+- Desktop and Start Menu shortcuts are created
+- To uninstall, use your OS uninstaller (see [Uninstalling](#uninstalling))
 
 ---
 
