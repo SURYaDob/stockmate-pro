@@ -61,17 +61,28 @@ jobs:
         run: npm run build
 
       - name: Build Electron app
+        id: electron-build
         working-directory: frontend
-        run: npx electron-builder --${{ matrix.platform }} --publish never
+        run: |
+          npx electron-builder --${{ matrix.platform }} --publish never 2>&1 | tee ../build-output.log
+          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CSC_LINK: ${{ secrets.MAC_CERT_P12 }}
-          CSC_KEY_PASSWORD: ${{ secrets.MAC_CERT_PASSWORD }}
-          WIN_CSC_LINK: ${{ secrets.WIN_CERT_P12 }}
-          WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CERT_PASSWORD }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+      - name: Upload build log on failure
+        if: steps.electron-build.outputs.exit_code != '0'
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ matrix.platform }}
+          path: build-output.log
+          retention-days: 5
+
+      - name: Fail if build failed
+        if: steps.electron-build.outputs.exit_code != '0'
+        run: |
+          echo "Build failed! Check the build-log artifact for details."
+          cat build-output.log
+          exit 1
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
