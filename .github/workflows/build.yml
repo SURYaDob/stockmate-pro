@@ -80,13 +80,7 @@ jobs:
         id: electron-build
         working-directory: frontend
         shell: bash
-        run: |
-          set +e
-          ${{ matrix.build-cmd }} 2>&1 | tee /tmp/build-output.log
-          EXIT_CODE=${PIPESTATUS[0]}
-          set -e
-          echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
-          exit $EXIT_CODE
+        run: ${{ matrix.build-cmd }} 2> >(tee build-stderr.log >&2)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -97,9 +91,9 @@ jobs:
           {
             echo "## ❌ Build Failed (${{ matrix.platform }})"
             echo ""
-            echo "### Last 200 lines of output:"
+            echo "### Last 200 lines of stderr:"
             echo '```'
-            tail -200 /tmp/build-output.log 2>/dev/null || echo "(no output captured)"
+            tail -200 frontend/build-stderr.log 2>/dev/null || echo "(no stderr captured)"
             echo '```'
           } >> $GITHUB_STEP_SUMMARY
 
@@ -108,7 +102,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-output-${{ matrix.platform }}
-          path: /tmp/build-output.log
+          path: frontend/build-stderr.log
           retention-days: 30
 
       - name: Upload artifacts
