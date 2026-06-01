@@ -4,7 +4,11 @@
   "version": "2.0.0",
   "type": "module",
   "description": "StockMate Pro - Inventory Management Desktop App",
-  "author": "StockMate Pro",
+  "homepage": "https://github.com/SURYaDob/stockmate-pro",
+  "author": {
+    "name": "StockMate Pro",
+    "email": "surajdobale29@gmail.com"
+  },
   "license": "MIT",
   "main": "electron/main.js",
   "scripts": {
