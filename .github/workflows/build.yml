@@ -81,8 +81,10 @@ jobs:
         working-directory: frontend
         shell: bash
         run: |
+          set +e
           ${{ matrix.build-cmd }} 2>&1 | tee /tmp/build-output.log
           EXIT_CODE=${PIPESTATUS[0]}
+          set -e
           echo "exit_code=$EXIT_CODE" >> $GITHUB_OUTPUT
           exit $EXIT_CODE
         env:
