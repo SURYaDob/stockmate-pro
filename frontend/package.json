@@ -43,18 +43,7 @@
     "extraResources": [
       {
         "from": "../backend",
-        "to": "backend",
-        "filter": [
-          "!**/*.map",
-          "!**/__tests__/**",
-          "!**/*.test.*",
-          "!**/*.spec.*",
-          "!tests",
-          "!.env*",
-          "!.dockerignore",
-          "!Dockerfile",
-          "!jest.config.*"
-        ]
+        "to": "backend"
       }
     ],
     "afterPack": "electron/afterPack.cjs",
