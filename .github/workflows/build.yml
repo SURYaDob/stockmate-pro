@@ -17,15 +17,15 @@ jobs:
         include:
           - os: windows-latest
             platform: win
+            build-cmd: npx electron-builder --win --publish never
           - os: macos-latest
             platform: mac
+            build-cmd: npx electron-builder --mac --publish never
           - os: ubuntu-latest
             platform: linux
+            build-cmd: npx electron-builder --linux --publish never
 
     runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        shell: bash
 
     steps:
       - name: Checkout repository
@@ -60,29 +60,41 @@ jobs:
         working-directory: frontend
         run: npm run build
 
+      - name: Debug build environment
+        working-directory: frontend
+        run: |
+          echo "=== Node version ==="
+          node --version
+          echo "=== NPM version ==="
+          npm --version
+          echo "=== electron-builder version ==="
+          npx electron-builder --version
+          echo "=== Dist directory ==="
+          ls -la dist/ 2>/dev/null || echo "No dist/ directory"
+          echo "=== electron-builder config ==="
+          node -e "const p = JSON.parse(require('fs').readFileSync('package.json','utf8')); console.log('build:', JSON.stringify(p.build, null, 2))"
+
       - name: Build Electron app
         id: electron-build
         working-directory: frontend
-        run: |
-          npx electron-builder --${{ matrix.platform }} --publish never 2>&1 | tee ../build-output.log
-          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+        run: ${{ matrix.build-cmd }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Upload build log on failure
-        if: steps.electron-build.outputs.exit_code != '0'
+      - name: Upload build output on failure
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: build-log-${{ matrix.platform }}
-          path: build-output.log
+          path: frontend/release/
           retention-days: 5
 
-      - name: Fail if build failed
-        if: steps.electron-build.outputs.exit_code != '0'
+      - name: List release artifacts
+        if: success()
+        working-directory: frontend
         run: |
-          echo "Build failed! Check the build-log artifact for details."
-          cat build-output.log
-          exit 1
+          echo "=== Release output ==="
+          ls -la release/ 2>/dev/null || echo "No release/ directory"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -99,7 +111,7 @@ jobs:
           retention-days: 30
 
       - name: Attach to release
-        if: startsWith(github.ref, 'refs/tags/')
+        if: success() && startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
           files: |
