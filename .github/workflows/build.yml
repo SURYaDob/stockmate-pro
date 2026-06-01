@@ -62,6 +62,7 @@ jobs:
 
       - name: Debug build environment
         working-directory: frontend
+        shell: bash
         run: |
           echo "=== Node version ==="
           node --version
@@ -70,14 +71,23 @@ jobs:
           echo "=== electron-builder version ==="
           npx electron-builder --version
           echo "=== Dist directory ==="
-          ls -la dist/ 2>/dev/null || echo "No dist/ directory"
-          echo "=== electron-builder config ==="
-          node -e "const p = JSON.parse(require('fs').readFileSync('package.json','utf8')); console.log('build:', JSON.stringify(p.build, null, 2))"
+          ls -la dist/ || echo "No dist/ directory"
+          echo "=== Public icons ==="
+          ls -la public/icons/ || echo "No icons directory"
 
       - name: Build Electron app
         id: electron-build
         working-directory: frontend
-        run: ${{ matrix.build-cmd }}
+        shell: bash
+        run: |
+          ${{ matrix.build-cmd }} 2>&1 || {
+            echo "=== BUILD FAILED — dumping debug info ==="
+            echo "Release directory:"
+            ls -la release/ || true
+            echo "=== package.json build config ==="
+            node -e "const p=JSON.parse(require('fs').readFileSync('package.json','utf8')); console.log(JSON.stringify(p.build, null, 2))"
+            exit 1
+          }
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -91,12 +101,14 @@ jobs:
 
       - name: List release artifacts
         if: success()
+        shell: bash
         working-directory: frontend
         run: |
           echo "=== Release output ==="
-          ls -la release/ 2>/dev/null || echo "No release/ directory"
+          ls -la release/ || echo "No release/ directory"
 
       - name: Upload artifacts
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: stockmate-pro-${{ matrix.platform }}
