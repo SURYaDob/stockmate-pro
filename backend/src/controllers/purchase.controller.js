@@ -144,7 +144,7 @@ const create = catchAsync(async (req, res) => {
       action: 'CREATE',
       entity: 'Purchase',
       entityId: purchase.id,
-      newValue: { poNumber, grandTotal },
+      newValue: JSON.stringify({ poNumber, grandTotal }),
     },
   });
 
@@ -460,7 +460,7 @@ const emailPO = catchAsync(async (req, res) => {
       action: 'EMAIL',
       entity: 'Purchase',
       entityId: purchase.id,
-      newValue: { emailedTo: to, poNumber: purchase.poNumber },
+      newValue: JSON.stringify({ emailedTo: to, poNumber: purchase.poNumber }),
     },
   });
 

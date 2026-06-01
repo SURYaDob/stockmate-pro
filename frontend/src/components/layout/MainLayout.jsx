@@ -11,9 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { useStockAlerts } from '../../hooks/useStockAlerts';
 import { useNotificationCount } from '../../hooks/useNotificationCount';
 import NotificationDropdown from '../notifications/NotificationDropdown';
-import InstallPwaBanner from '../pwa/InstallPwaBanner';
-import OfflineIndicator from '../pwa/OfflineIndicator';
-import UpdateNotification from '../pwa/UpdateNotification';
+import UpdateBanner from '../common/UpdateBanner';
 
 const navItems = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'nav.dashboard' },
@@ -48,8 +46,9 @@ const MainLayout = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-primary-900">
-      <OfflineIndicator />
-      <UpdateNotification />
+      {/* Auto-update banner */}
+      <UpdateBanner />
+
       {/* Mobile header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-4 py-3 flex items-center justify-between">
         <button onClick={() => setSidebarOpen(true)} className="btn-ghost p-2">
@@ -230,7 +229,6 @@ const MainLayout = ({ children }) => {
         ))}
       </nav>
 
-      <InstallPwaBanner />
     </div>
   );
 };

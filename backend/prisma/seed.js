@@ -820,7 +820,7 @@ async function main() {
         action: audit.action,
         entity: audit.entity,
         entityId: audit.entityId,
-        newValue: audit.newValue,
+        newValue: JSON.stringify(audit.newValue),
         createdAt: daysAgo(randomInt(10, 55)),
       },
     });

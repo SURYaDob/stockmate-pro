@@ -48,7 +48,7 @@ const updateCompanyProfile = catchAsync(async (req, res) => {
       action: 'UPDATE',
       entity: 'CompanyProfile',
       entityId: profile.id,
-      newValue: { companyName: updated.companyName },
+      newValue: JSON.stringify({ companyName: updated.companyName }),
     },
   });
 

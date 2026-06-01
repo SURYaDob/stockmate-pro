@@ -1,4 +1,15 @@
-const webpush = require('web-push');
+// ─── Optional web-push import ────────────────────────────────────────────────
+// web-push is optional — when not installed (e.g. desktop builds without VAPID),
+// push notifications are silently skipped instead of crashing the process.
+
+let webpush;
+
+try {
+  webpush = require('web-push');
+} catch {
+  console.warn('[PushNotification] web-push not installed — push notifications are disabled.');
+}
+
 const { prisma } = require('../utils/prisma');
 
 // Configure VAPID keys
@@ -9,6 +20,8 @@ const VAPID_MAILTO = process.env.VAPID_MAILTO || 'mailto:noreply@stockmatepro.co
 let isConfigured = false;
 
 const configure = () => {
+  if (!webpush) return false;
+
   if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
     console.warn(
       '\x1b[33m[WARN] VAPID keys not configured. Push notifications will not work.\x1b[0m\n' +

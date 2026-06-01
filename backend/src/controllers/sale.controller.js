@@ -236,7 +236,7 @@ const create = catchAsync(async (req, res) => {
       action: 'CREATE',
       entity: 'Sale',
       entityId: sale.id,
-      newValue: { invoiceNo, grandTotal },
+      newValue: JSON.stringify({ invoiceNo, grandTotal }),
     },
   });
 
@@ -690,7 +690,7 @@ const emailInvoice = catchAsync(async (req, res) => {
       action: 'EMAIL',
       entity: 'Sale',
       entityId: sale.id,
-      newValue: { emailedTo: to, invoiceNo: sale.invoiceNo },
+      newValue: JSON.stringify({ emailedTo: to, invoiceNo: sale.invoiceNo }),
     },
   });
 

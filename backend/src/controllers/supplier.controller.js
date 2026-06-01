@@ -61,7 +61,7 @@ const create = catchAsync(async (req, res) => {
   });
 
   await prisma.auditLog.create({
-    data: { userId: req.user.id, action: 'CREATE', entity: 'Supplier', entityId: supplier.id, newValue: { name } },
+    data: { userId: req.user.id, action: 'CREATE', entity: 'Supplier', entityId: supplier.id, newValue: JSON.stringify({ name }) },
   });
 
   sendSuccess(res, supplier, 'Supplier created', 201);

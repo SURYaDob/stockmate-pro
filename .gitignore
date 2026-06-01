@@ -31,7 +31,11 @@ frontend/.env
 npm-debug.log*
 
 # Prisma
+backend/prisma/stockmate.db
+backend/prisma/stockmate.db-wal
+backend/prisma/stockmate.db-shm
 backend/prisma/migrations/
+backend/prisma/migration-backups/
 
 # Test coverage
 coverage/

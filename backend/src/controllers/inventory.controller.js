@@ -147,7 +147,7 @@ const create = catchAsync(async (req, res) => {
       action: 'CREATE',
       entity: 'Inventory',
       entityId: item.id,
-      newValue: { name, sku },
+      newValue: JSON.stringify({ name, sku }),
     },
   });
 
@@ -203,8 +203,8 @@ const update = catchAsync(async (req, res) => {
       action: 'UPDATE',
       entity: 'Inventory',
       entityId: item.id,
-      oldValue,
-      newValue: item,
+      oldValue: JSON.stringify(oldValue),
+      newValue: JSON.stringify(item),
     },
   });
 
@@ -226,7 +226,7 @@ const delete_ = catchAsync(async (req, res) => {
       action: 'DELETE',
       entity: 'Inventory',
       entityId: req.params.id,
-      oldValue: { name: existing.name, sku: existing.sku },
+      oldValue: JSON.stringify({ name: existing.name, sku: existing.sku }),
     },
   });
 
