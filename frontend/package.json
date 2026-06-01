@@ -45,11 +45,15 @@
         "from": "../backend",
         "to": "backend",
         "filter": [
-          "src/**/*",
-          "prisma/**/*",
-          "node_modules/**/*",
-          "package.json",
-          "desktop-server.js"
+          "!**/*.map",
+          "!**/__tests__/**",
+          "!**/*.test.*",
+          "!**/*.spec.*",
+          "!tests",
+          "!.env*",
+          "!.dockerignore",
+          "!Dockerfile",
+          "!jest.config.*"
         ]
       }
     ],
