@@ -1,12 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft, UserCircle, Edit, AlertTriangle, Loader2,
   User, Phone, Mail, MapPin, Hash,
   Calendar, Wallet, ShoppingCart,
-  TrendingDown, TrendingUp, Package,
-  X, Check, FileText, ClipboardList,
-  CreditCard, BadgeCheck, Download
+  TrendingDown, TrendingUp,
+  X, CreditCard, Download
 } from 'lucide-react';
 import api from '../../utils/api';
 
@@ -46,7 +45,7 @@ const CustomerDetail = () => {
   const [creditDesc, setCreditDesc] = useState('');
   const [recordingCredit, setRecordingCredit] = useState(false);
 
-  const fetchCustomer = async () => {
+  const fetchCustomer = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -61,11 +60,11 @@ const CustomerDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     fetchCustomer();
-  }, [id]);
+  }, [fetchCustomer]);
 
   // Record payment
   const handleRecordPayment = async (e) => {
@@ -385,8 +384,6 @@ const CustomerDetail = () => {
               ) : (
                 <div className="space-y-0">
                   {ledger.map((entry, idx) => {
-                    const isCredit = entry.type === 'PAYMENT' || entry.type === 'CREDIT_NOTE';
-                    const isDebit = entry.type === 'SALE';
                     return (
                       <div
                         key={entry.id}

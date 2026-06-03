@@ -1,12 +1,12 @@
 import React, { useState, useCallback } from 'react';
 import {
   BarChart3, TrendingUp, Package, ShoppingCart, Truck,
-  AlertTriangle, DollarSign, Loader2, Download, Filter,
-  ChevronLeft, ChevronRight, FileText, Wallet,
-  IndianRupee, LineChart, Clock, Shield, RefreshCw
+  AlertTriangle, DollarSign, Loader2, Filter,
+  ChevronLeft, ChevronRight, Wallet,
+  IndianRupee, Clock, Shield, RefreshCw
 } from 'lucide-react';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend
 } from 'recharts';
 import api from '../../utils/api';
@@ -35,22 +35,6 @@ const reportTypes = [
   { id: 'dead-stock', label: 'Dead Stock', icon: Clock, color: 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400' },
   { id: 'audit-log', label: 'Audit Log', icon: Shield, color: 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300' },
 ];
-
-const ChartTooltip = ({ active, payload, label }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-lg p-3">
-        <p className="text-xs text-slate-500 mb-1">{label}</p>
-        {payload.map((entry, idx) => (
-          <p key={idx} className="text-sm font-semibold" style={{ color: entry.color }}>
-            {entry.name}: {typeof entry.value === 'number' && entry.value > 100 ? formatPrice(entry.value) : entry.value}
-          </p>
-        ))}
-      </div>
-    );
-  }
-  return null;
-};
 
 const Reports = () => {
   const [activeReport, setActiveReport] = useState('sales');
@@ -174,7 +158,7 @@ const Reports = () => {
             <Loader2 size={32} className="animate-spin text-accent-500" />
           </div>
         ) : activeReport === 'sales' ? (
-          <SalesReport data={data} formatPrice={formatPrice} formatDate={formatDate} fetchReport={fetchReport} />
+          <SalesReport data={data} formatPrice={formatPrice} formatDate={formatDate} />
         ) : activeReport === 'purchases' ? (
           <PurchaseReport data={data} formatPrice={formatPrice} formatDate={formatDate} />
         ) : activeReport === 'profit-loss' ? (
@@ -211,7 +195,7 @@ const SummaryCard = ({ icon: Icon, label, value, color }) => (
   </div>
 );
 
-const SalesReport = ({ data, formatPrice, formatDate, fetchReport }) => {
+const SalesReport = ({ data, formatPrice, formatDate }) => {
   if (!data) return <EmptyReport message="Select date range and click Refresh to load sales report" />;
   const { sales = [], summary = {} } = data;
 
@@ -506,7 +490,7 @@ const GstReport = ({ data, formatPrice, formatDate }) => {
   );
 };
 
-const LowStockReport = ({ data, formatPrice }) => {
+const LowStockReport = ({ data }) => {
   if (!data) return <EmptyReport message="Click Refresh to load low stock report" />;
   if (!Array.isArray(data) || data.length === 0) return <EmptyReport message="No low stock items found" icon={AlertTriangle} />;
 

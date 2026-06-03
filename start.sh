@@ -3,6 +3,11 @@ set -e
 
 # StockMate Pro - One-command setup & launch
 # ============================================
+#
+# Usage:
+#   ./start.sh           # Production mode (build + preview servers)
+#   ./start.sh --dev     # Dev mode (Vite hot-reload + nodemon)
+#   ./start.sh -d        # Dev mode shorthand
 
 BOLD='\033[1m'
 DIM='\033[2m'
@@ -11,6 +16,14 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 CYAN='\033[0;36m'
 NC='\033[0m' # No Color
+
+# Parse --dev flag
+DEV_MODE=0
+for arg in "$@"; do
+  if [ "$arg" = "--dev" ] || [ "$arg" = "-d" ]; then
+    DEV_MODE=1
+  fi
+done
 
 echo ""
 echo -e "${BOLD}╔══════════════════════════════════════════════╗${NC}"
@@ -43,16 +56,18 @@ echo -e "\r${GREEN}[✓]${NC} Node.js $(node --version)"
 
 # ---------- Environment ----------
 if [ ! -f backend/.env ]; then
-    echo ""
-    echo -e "${YELLOW}[i]${NC} Creating backend/.env from template..."
-    cp backend/.env.example backend/.env
-    echo -e "${YELLOW}[!]${NC} Please edit backend/.env with your database settings."
-    echo "    Then run this script again."
-    echo ""
-    echo "    Example MySQL connection:"
-    echo -e "    ${DIM}DATABASE_URL=mysql://root:password@localhost:3306/stockmate_pro${NC}"
-    echo ""
-    exit 0
+    if [ -f backend/.env.example ]; then
+        echo ""
+        echo -e "${YELLOW}[i]${NC} Creating backend/.env from template..."
+        cp backend/.env.example backend/.env
+        echo -e "${YELLOW}[!]${NC} Please edit backend/.env with your database settings."
+        echo "    Then run this script again."
+        echo ""
+        echo "    Example MySQL connection:"
+        echo -e "    ${DIM}DATABASE_URL=mysql://root:password@localhost:3306/stockmate_pro${NC}"
+        echo ""
+        exit 0
+    fi
 fi
 echo -e "${GREEN}[✓]${NC} Backend configuration found"
 
@@ -80,72 +95,100 @@ echo -e "${YELLOW}[~]${NC} Seeding database with sample data..."
 (cd backend && node prisma/seed.js) || echo -e "${YELLOW}[!]${NC} Seed may have partially completed"
 echo -e "${GREEN}[✓]${NC} Database seeded"
 
-# ---------- Build frontend ----------
+echo -e "${GREEN}[✓]${NC} Setup complete!"
 echo ""
-echo -e "${YELLOW}[~]${NC} Building frontend for production..."
-(cd frontend && npm run build)
-echo -e "${GREEN}[✓]${NC} Frontend built"
 
 # ---------- Start servers ----------
-echo ""
-echo -e "${BOLD}╔══════════════════════════════════════════════╗${NC}"
-echo -e "${BOLD}║         Starting StockMate Pro                ║${NC}"
-echo -e "${BOLD}╠══════════════════════════════════════════════╣${NC}"
-echo -e "${BOLD}║${NC}  Frontend:  ${CYAN}http://localhost:3000${NC}             ║"
-echo -e "${BOLD}║${NC}  Backend:   ${CYAN}http://localhost:5000${NC}             ║"
-echo -e "${BOLD}║${NC}  API Docs:  ${CYAN}http://localhost:5000/api/health${NC}  ║"
-echo -e "${BOLD}╚══════════════════════════════════════════════╝${NC}"
-echo ""
-echo -e "${DIM}Login Credentials:${NC}"
-echo -e "${DIM}─────────────────────────────────────────────${NC}"
-echo -e "  ${DIM}Admin:        admin@stockmate.com / Admin@123${NC}"
-echo -e "  ${DIM}Store Manager: manager@stockmate.com / Manager@123${NC}"
-echo -e "  ${DIM}Staff:        staff@stockmate.com / Staff@123${NC}"
-echo -e "  ${DIM}Accountant:   accountant@stockmate.com / Accountant@123${NC}"
-echo ""
-echo -e "${YELLOW}Press Ctrl+C to stop all servers.${NC}"
-echo ""
-
-# Cleanup function
-cleanup() {
+if [ "$DEV_MODE" = "1" ]; then
+    echo -e "${BOLD}╔══════════════════════════════════════════════╗${NC}"
+    echo -e "${BOLD}║    Starting Dev Mode (Vite + Nodemon)        ║${NC}"
+    echo -e "${BOLD}╠══════════════════════════════════════════════╣${NC}"
+    echo -e "${BOLD}║${NC}  Frontend:  ${CYAN}http://localhost:3000${NC}             ║"
+    echo -e "${BOLD}║${NC}  Backend:   ${CYAN}http://localhost:5000${NC}             ║"
+    echo -e "${BOLD}║${NC}  API via:   Vite proxy (/api → :5000)    ║"
+    echo -e "${BOLD}╚══════════════════════════════════════════════╝${NC}"
     echo ""
-    echo -e "${YELLOW}[~]${NC} Shutting down..."
-    kill $BACKEND_PID $FRONTEND_PID 2>/dev/null
-    echo -e "${GREEN}[✓]${NC} Servers stopped."
-    exit 0
-}
-trap cleanup SIGINT SIGTERM
+    echo -e "${DIM}Login Credentials:${NC}"
+    echo -e "${DIM}─────────────────────────────────────────────${NC}"
+    echo -e "  ${DIM}Admin:        admin@stockmate.com / Admin@123${NC}"
+    echo -e "  ${DIM}Store Manager: manager@stockmate.com / Manager@123${NC}"
+    echo -e "  ${DIM}Staff:        staff@stockmate.com / Staff@123${NC}"
+    echo -e "  ${DIM}Accountant:   accountant@stockmate.com / Accountant@123${NC}"
+    echo ""
+    echo -e "${YELLOW}Press Ctrl+C to stop all servers.${NC}"
+    echo ""
 
-# Start backend
-(cd backend && npm run dev) &
-BACKEND_PID=$!
+    # Start both together via frontend's dev:all (uses concurrently)
+    cd frontend
+    npm run dev:all
+    cd ..
+else
+    # Build frontend for production
+    echo ""
+    echo -e "${YELLOW}[~]${NC} Building frontend for production..."
+    (cd frontend && npm run build)
+    echo -e "${GREEN}[✓]${NC} Frontend built"
 
-# Wait for backend to be ready (max 30 seconds)
-echo -n "[~] Waiting for backend to start..."
-for i in $(seq 1 30); do
-    if curl -s http://localhost:5000/api/health > /dev/null 2>&1; then
-        echo -e "\r${GREEN}[✓]${NC} Backend is running on http://localhost:5000"
-        break
+    echo ""
+    echo -e "${BOLD}╔══════════════════════════════════════════════╗${NC}"
+    echo -e "${BOLD}║         Starting StockMate Pro                ║${NC}"
+    echo -e "${BOLD}╠══════════════════════════════════════════════╣${NC}"
+    echo -e "${BOLD}║${NC}  Frontend:  ${CYAN}http://localhost:3000${NC}             ║"
+    echo -e "${BOLD}║${NC}  Backend:   ${CYAN}http://localhost:5000${NC}             ║"
+    echo -e "${BOLD}║${NC}  API Docs:  ${CYAN}http://localhost:5000/api/health${NC}  ║"
+    echo -e "${BOLD}╚══════════════════════════════════════════════╝${NC}"
+    echo ""
+    echo -e "${DIM}Login Credentials:${NC}"
+    echo -e "${DIM}─────────────────────────────────────────────${NC}"
+    echo -e "  ${DIM}Admin:        admin@stockmate.com / Admin@123${NC}"
+    echo -e "  ${DIM}Store Manager: manager@stockmate.com / Manager@123${NC}"
+    echo -e "  ${DIM}Staff:        staff@stockmate.com / Staff@123${NC}"
+    echo -e "  ${DIM}Accountant:   accountant@stockmate.com / Accountant@123${NC}"
+    echo ""
+    echo -e "${YELLOW}Press Ctrl+C to stop all servers.${NC}"
+    echo ""
+
+    # Cleanup function
+    cleanup() {
+        echo ""
+        echo -e "${YELLOW}[~]${NC} Shutting down..."
+        kill $BACKEND_PID $FRONTEND_PID 2>/dev/null
+        echo -e "${GREEN}[✓]${NC} Servers stopped."
+        exit 0
+    }
+    trap cleanup SIGINT SIGTERM
+
+    # Start backend
+    (cd backend && npm run dev) &
+    BACKEND_PID=$!
+
+    # Wait for backend to be ready (max 30 seconds)
+    echo -n "[~] Waiting for backend to start..."
+    for i in $(seq 1 30); do
+        if curl -s http://localhost:5000/api/health > /dev/null 2>&1; then
+            echo -e "\r${GREEN}[✓]${NC} Backend is running on http://localhost:5000"
+            break
+        fi
+        if [ "$i" -eq 30 ]; then
+            echo -e "\r${YELLOW}[!]${NC} Backend may not be ready yet. Check http://localhost:5000/api/health"
+        fi
+        sleep 1
+    done
+
+    # Start frontend
+    (cd frontend && npx vite preview --port 3000) &
+    FRONTEND_PID=$!
+
+    sleep 2
+    echo -e "${GREEN}[✓]${NC} Frontend is running on http://localhost:3000"
+    echo ""
+
+    # Open browser if possible
+    if command -v xdg-open &> /dev/null; then
+        xdg-open http://localhost:3000 2>/dev/null
+    elif command -v open &> /dev/null; then
+        open http://localhost:3000 2>/dev/null
     fi
-    if [ "$i" -eq 30 ]; then
-        echo -e "\r${YELLOW}[!]${NC} Backend may not be ready yet. Check http://localhost:5000/api/health"
-    fi
-    sleep 1
-done
 
-# Start frontend
-(cd frontend && npx vite preview --port 3000) &
-FRONTEND_PID=$!
-
-sleep 2
-echo -e "${GREEN}[✓]${NC} Frontend is running on http://localhost:3000"
-echo ""
-
-# Open browser if possible
-if command -v xdg-open &> /dev/null; then
-    xdg-open http://localhost:3000 2>/dev/null
-elif command -v open &> /dev/null; then
-    open http://localhost:3000 2>/dev/null
+    wait
 fi
-
-wait

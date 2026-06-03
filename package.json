@@ -1,0 +1,25 @@
+{
+  "name": "stockmate-pro-workspace",
+  "version": "2.0.0",
+  "private": true,
+  "description": "StockMate Pro - Inventory Management Desktop App (workspace root)",
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "dev:all": "npm --prefix frontend run dev:all",
+    "start": "npm --prefix frontend run dev:all",
+    "electron:dev": "npm --prefix frontend run electron:dev",
+    "electron:start": "npm --prefix frontend run electron:start",
+    "build": "npm --prefix frontend run build",
+    "preview": "npm --prefix frontend run preview",
+    "seed": "npm --prefix backend run seed",
+    "migrate": "npm --prefix backend run migrate",
+    "studio": "npm --prefix backend run studio",
+    "lint": "npm --prefix frontend run lint",
+    "test": "npm --prefix frontend run test"
+  },
+  "author": {
+    "name": "StockMate Pro",
+    "email": "surajdobale29@gmail.com"
+  },
+  "license": "MIT"
+}

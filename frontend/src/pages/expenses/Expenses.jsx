@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
-  Wallet, Plus, Search, X, Loader2, AlertTriangle,
-  ChevronLeft, ChevronRight, MoreVertical, Eye,
+  Wallet, Plus, X, Loader2, AlertTriangle,
+  ChevronLeft, ChevronRight,
   RefreshCw, Filter, Edit, Trash2, Save, Calendar,
-  TrendingUp, PieChart, FileText, Download, DollarSign, Tag
+  TrendingUp, FileText, Download, DollarSign, Tag
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../../utils/api';

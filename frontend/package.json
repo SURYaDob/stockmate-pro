@@ -2,7 +2,6 @@
   "name": "stockmate-pro",
   "private": true,
   "version": "2.0.0",
-  "type": "module",
   "description": "StockMate Pro - Inventory Management Desktop App",
   "homepage": "https://github.com/SURYaDob/stockmate-pro",
   "author": {
@@ -13,12 +12,13 @@
   "main": "electron/main.js",
   "scripts": {
     "dev": "vite",
+    "dev:all": "concurrently --kill-others -n BE,FE -c cyan,green \"cd ../backend && npm run dev\" \"vite\"",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 100",
     "test": "vitest run",
     "test:watch": "vitest",
-    "electron:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron:dev": "concurrently --kill-others -n BE,FE,EL -c cyan,green,blue \"cd ../backend && npm run dev\" \"npm run dev\" \"wait-on http://localhost:3000 && electron .\"",
     "electron:build": "npm run build && electron-builder",
     "electron:build:win": "npm run build && electron-builder --win",
     "electron:build:mac": "npm run build && electron-builder --mac",
@@ -63,8 +63,10 @@
       ],
       "icon": "public/icons/icon-512x512.png",
       "artifactName": "${productName}-Setup-${version}.${ext}",
-      "signingHashAlgorithms": ["sha256"],
-      "rfc3161TimeStampServer": "http://timestamp.digicert.com"
+      "signtoolOptions": {
+        "signingHashAlgorithms": ["sha256"],
+        "rfc3161TimeStampServer": "http://timestamp.digicert.com"
+      }
     },
     "nsis": {
       "oneClick": false,

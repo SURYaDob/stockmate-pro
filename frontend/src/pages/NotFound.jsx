@@ -13,8 +13,8 @@ const NotFound = () => {
         <h1 className="text-7xl font-bold text-slate-200 dark:text-slate-700 mb-4">404</h1>
         <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-3">Page Not Found</h2>
         <p className="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed">
-          The page you are looking for doesn't exist or has been moved.
-          Let's get you back on track.
+          The page you are looking for doesn&apos;t exist or has been moved.
+          Let&apos;s get you back on track.
         </p>
 
         <div className="flex items-center justify-center gap-3">

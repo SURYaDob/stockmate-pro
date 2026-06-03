@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
   ArrowLeft, Package, Edit, Copy, Archive, AlertTriangle, Loader2,
@@ -54,7 +54,7 @@ const InventoryDetail = () => {
   const [adjusting, setAdjusting] = useState(false);
   const [confirmArchive, setConfirmArchive] = useState(false);
 
-  const fetchItem = async () => {
+  const fetchItem = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -65,11 +65,11 @@ const InventoryDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     fetchItem();
-  }, [id]);
+  }, [fetchItem]);
 
   // Archive item
   const handleArchive = async () => {
@@ -629,7 +629,7 @@ const InventoryDetail = () => {
               </div>
               <h2 className="text-lg font-semibold mb-2">Archive Item?</h2>
               <p className="text-sm text-slate-500 mb-6">
-                Are you sure you want to archive "{item.name}"? This will hide it from active inventory but preserve all data.
+                Are you sure you want to archive &quot;{item.name}&quot;? This will hide it from active inventory but preserve all data.
               </p>
               <div className="flex justify-center gap-3">
                 <button onClick={() => setConfirmArchive(false)} className="btn-secondary">

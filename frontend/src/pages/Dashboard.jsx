@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   BarChart3, Package, ShoppingCart, AlertTriangle, TrendingUp, DollarSign,
-  Users, Truck, Loader2, RefreshCw, Wallet, BadgeCheck, Clock
+  Users, Truck, RefreshCw, Wallet, BadgeCheck
 } from 'lucide-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,

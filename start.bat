@@ -2,6 +2,10 @@
 title StockMate Pro - Setup & Launch
 chcp 65001 >nul
 
+set DEV_MODE=0
+if /I "%1"=="--dev" set DEV_MODE=1
+if /I "%1"=="-d" set DEV_MODE=1
+
 echo ╔══════════════════════════════════════════════╗
 echo ║         StockMate Pro — Setup ^& Launch       ║
 echo ╚══════════════════════════════════════════════╝
@@ -31,16 +35,18 @@ if %ERRORLEVEL% NEQ 0 (
 if not exist backend\.env (
     echo.
     echo [i] Creating backend\.env from template...
-    copy backend\.env.example backend\.env >nul
-    echo [!] Please edit backend\.env with your database settings.
-    echo     Then run start.bat again.
-    echo.
-    echo     Default MySQL connection:
-    echo     DATABASE_URL=mysql://root:password@localhost:3306/stockmate_pro
-    echo.
-    start notepad backend\.env
-    pause
-    exit /b 0
+    if exist backend\.env.example (
+        copy backend\.env.example backend\.env >nul
+        echo [!] Please edit backend\.env with your database settings.
+        echo     Then run start.bat again.
+        echo.
+        echo     Default MySQL connection:
+        echo     DATABASE_URL=mysql://root:password@localhost:3306/stockmate_pro
+        echo.
+        start notepad backend\.env
+        pause
+        exit /b 0
+    )
 )
 echo [✓] Backend configuration found
 
@@ -104,20 +110,48 @@ if %ERRORLEVEL% NEQ 0 (
 echo [✓] Database seeded
 cd ..
 
-:: Build frontend
-echo.
-echo [~] Building frontend for production...
-cd frontend
-call npm run build
-if %ERRORLEVEL% NEQ 0 (
-    echo [✗] Frontend build failed
-    pause
-    exit /b 1
-)
-echo [✓] Frontend built
-cd ..
+echo [✓] Setup complete!
 
-:: Start servers
+:: Start in dev mode (hot-reload) or production
+if %DEV_MODE%==1 (
+    echo.
+    echo ╔══════════════════════════════════════════════╗
+    echo ║    Starting Dev Mode (Vite + Nodemon)        ║
+    echo ╠══════════════════════════════════════════════╣
+    echo ║  Frontend:  http://localhost:3000             ║
+    echo ║  Backend:   http://localhost:5000             ║
+    echo ║  API via:   Vite proxy (/api -^> :5000)       ║
+    echo ╚══════════════════════════════════════════════╝
+    echo.
+    echo   Login Credentials:
+    echo   ─────────────────────────────────────────────
+    echo   Admin:        admin@stockmate.com / Admin@123
+    echo   Store Manager: manager@stockmate.com / Manager@123
+    echo   Staff:        staff@stockmate.com / Staff@123
+    echo   Accountant:   accountant@stockmate.com / Accountant@123
+    echo.
+    echo   Close this window to stop all servers.
+    echo.
+
+    :: Start both backend and frontend together via frontend's dev:all script
+    cd frontend
+    call npm run dev:all
+    cd ..
+) else (
+    :: Build frontend for production
+    echo.
+    echo [~] Building frontend for production...
+    cd frontend
+    call npm run build
+    if %ERRORLEVEL% NEQ 0 (
+        echo [✗] Frontend build failed
+        pause
+        exit /b 1
+    )
+    echo [✓] Frontend built
+    cd ..
+
+    :: Start servers
 echo.
 echo ╔══════════════════════════════════════════════╗
 echo ║         Starting StockMate Pro                ║
@@ -137,41 +171,42 @@ echo.
 echo   Close this window to stop all servers.
 echo.
 
-:: Start backend
-start "StockMate Backend" /MIN cmd /c "cd /d %CD%\backend && npm run dev"
+    :: Start backend
+    start "StockMate Backend" /MIN cmd /c "cd /d %CD%\backend && npm run dev"
 
-:: Wait for backend to start (with timeout)
-echo [~] Waiting for backend to start...
-setlocal enabledelayedexpansion
-set WAIT_COUNT=0
+    :: Wait for backend to start (with timeout)
+    echo [~] Waiting for backend to start...
+    setlocal enabledelayedexpansion
+    set WAIT_COUNT=0
 :waitloop
-if !WAIT_COUNT! geq 30 (
-    echo [!] Backend may not be ready yet. Check http://localhost:5000/api/health
-    goto :continue_after_wait
-)
-timeout /t 2 /nobreak >nul
->nul 2>&1 powershell -Command "try { (Invoke-WebRequest -Uri 'http://localhost:5000/api/health' -UseBasicParsing).StatusCode -eq 200 } catch { $false }" && goto :backend_ready
-set /a WAIT_COUNT+=1
-goto waitloop
+    if !WAIT_COUNT! geq 30 (
+        echo [!] Backend may not be ready yet. Check http://localhost:5000/api/health
+        goto :continue_after_wait
+    )
+    timeout /t 2 /nobreak >nul
+    >nul 2>&1 powershell -Command "try { (Invoke-WebRequest -Uri 'http://localhost:5000/api/health' -UseBasicParsing).StatusCode -eq 200 } catch { $false }" && goto :backend_ready
+    set /a WAIT_COUNT+=1
+    goto waitloop
 :backend_ready
-endlocal
-echo [✓] Backend is running
+    endlocal
+    echo [✓] Backend is running
 :continue_after_wait
-set WAIT_COUNT=
+    set WAIT_COUNT=
 
-:: Start frontend
-start "StockMate Frontend" /MIN cmd /c "cd /d %CD%\frontend && npm run preview -- --port 3000"
+    :: Start frontend
+    start "StockMate Frontend" /MIN cmd /c "cd /d %CD%\frontend && npm run preview -- --port 3000"
 
-echo [✓] Frontend is starting...
-echo.
-start http://localhost:3000
-echo.
-echo   Press any key to stop all servers...
-pause >nul
+    echo [✓] Frontend is starting...
+    echo.
+    start http://localhost:3000
+    echo.
+    echo   Press any key to stop all servers...
+    pause >nul
 
-:: Cleanup
-echo [~] Shutting down...
-taskkill /f /t /fi "WINDOWTITLE eq StockMate Backend" >nul 2>nul
-taskkill /f /t /fi "WINDOWTITLE eq StockMate Frontend" >nul 2>nul
-echo [✓] Servers stopped.
-pause
+    :: Cleanup
+    echo [~] Shutting down...
+    taskkill /f /t /fi "WINDOWTITLE eq StockMate Backend" >nul 2>nul
+    taskkill /f /t /fi "WINDOWTITLE eq StockMate Frontend" >nul 2>nul
+    echo [✓] Servers stopped.
+    pause
+)

@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   UserCheck, Plus, Search, X, Loader2, AlertTriangle,
-  ChevronLeft, ChevronRight, MoreVertical, Eye,
-  RefreshCw, Edit, Save, Calendar, Clock,
-  User, Phone, Mail, Shield, DollarSign,
-  CheckCircle, XCircle, LogIn, LogOut,
+  ChevronLeft, ChevronRight, Eye,
+  RefreshCw, Edit, Save, Clock,
+  User, LogIn, LogOut,
   BadgeCheck, Briefcase, TrendingUp, Users
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -13,14 +12,6 @@ import api from '../../utils/api';
 const formatPrice = (paise) => {
   if (paise == null) return '—';
   return `₹${(paise / 100).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-};
-
-const formatDate = (dateStr) => {
-  if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('en-IN', {
-    day: '2-digit', month: 'short', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  });
 };
 
 const formatDateShort = (dateStr) => {

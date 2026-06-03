@@ -2,11 +2,9 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, Package, ShoppingCart, Truck, Users, UserCircle,
-  BarChart3, Wallet, UserCheck, Settings, Bell, LogOut, Menu, X,
-  Search, Plus, Download
+  BarChart3, Wallet, UserCheck, Settings, Bell, LogOut, Menu, X
 } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
-import { useThemeStore } from '../../store/themeStore';
 import { useTranslation } from 'react-i18next';
 import { useStockAlerts } from '../../hooks/useStockAlerts';
 import { useNotificationCount } from '../../hooks/useNotificationCount';
@@ -38,7 +36,7 @@ const bottomNavItems = [
 const MainLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
   const { user, logout } = useAuthStore();
-  const { theme, toggleTheme } = useThemeStore();
+  // Theme is managed globally in App.jsx
   const { t } = useTranslation();
   const { lowStockCount } = useStockAlerts(!!user);
   const { unreadCount: notifUnreadCount, refreshCount } = useNotificationCount(!!user);

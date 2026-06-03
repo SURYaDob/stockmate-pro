@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
   Package, Plus, Upload, Search, ChevronDown, ChevronUp,
   ChevronLeft, ChevronRight, MoreVertical, Edit, Copy, Archive,
@@ -11,16 +11,10 @@ import { useTranslation } from 'react-i18next';
 import api from '../../utils/api';
 
 const CATEGORIES = ['PLUMBING', 'ELECTRICAL', 'PAINTING', 'HARDWARE', 'TOOLS', 'SANITARY', 'SAFETY_EQUIPMENT'];
-const UNIT_TYPES = ['PCS', 'LITERS', 'KG', 'METERS', 'BOXES', 'ROLLS', 'PAIRS'];
 
 const formatPrice = (paise) => {
   if (paise == null) return '—';
   return `₹${(paise / 100).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-};
-
-const formatDate = (dateStr) => {
-  if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 
 const categoryColors = {
@@ -35,7 +29,6 @@ const categoryColors = {
 
 const InventoryList = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const location = useLocation();
   const searchRef = useRef(null);
 

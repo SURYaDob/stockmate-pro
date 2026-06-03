@@ -80,8 +80,13 @@ const useAuthStore = create(
 
       verifyOtp: async (email, otp) => {
         const res = await api.post('/auth/verify-otp', { email, otp });
-        const { accessToken, refreshToken } = res.data.data;
-        set({ token: accessToken, refreshToken, isAuthenticated: true });
+        const { user, accessToken, refreshToken } = res.data.data;
+        set({
+          user: user || null,
+          token: accessToken,
+          refreshToken,
+          isAuthenticated: true,
+        });
         return { success: true };
       },
 

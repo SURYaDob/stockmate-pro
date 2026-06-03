@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft, Building2, AlertTriangle, Loader2,
-  TrendingUp, TrendingDown, Search, X,
+  TrendingUp, X,
   ChevronLeft, ChevronRight, SlidersHorizontal,
-  Wallet, FileText, RefreshCw, Clock, Receipt, RotateCcw
+  Wallet, FileText, RefreshCw, Receipt, RotateCcw
 } from 'lucide-react';
 import api from '../../utils/api';
 
@@ -19,11 +19,6 @@ const formatDate = (dateStr) => {
     day: '2-digit', month: 'short', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
   });
-};
-
-const formatDateShort = (dateStr) => {
-  if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
 };
 
 const typeConfig = {
@@ -53,7 +48,7 @@ const SupplierLedger = () => {
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -77,11 +72,11 @@ const SupplierLedger = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id, page, typeFilter, startDate, endDate, limit]);
 
   useEffect(() => {
     fetchData();
-  }, [id, page, typeFilter, startDate, endDate]);
+  }, [fetchData]);
 
   // Compute stats from the supplier data
   const stats = ledger.reduce(

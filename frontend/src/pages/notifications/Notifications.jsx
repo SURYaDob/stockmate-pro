@@ -2,22 +2,14 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Bell, Check, CheckCheck, Settings, X, Loader2, AlertTriangle,
   RefreshCw, Package, ShoppingCart, Truck, Wallet,
-  Clock, TrendingUp, UserCheck, Shield, Info,
-  ChevronLeft, ChevronRight, Mail, BellRing, BellOff,
+  UserCheck, Info,
+  Mail, BellRing,
   Save, CreditCard, Calendar, Smartphone
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import api from '../../utils/api';
 import { usePushSubscription } from '../../hooks/usePushSubscription';
-
-const formatDate = (dateStr) => {
-  if (!dateStr) return '—';
-  return new Date(dateStr).toLocaleDateString('en-IN', {
-    day: '2-digit', month: 'short', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  });
-};
 
 const formatDateShort = (dateStr) => {
   if (!dateStr) return '—';
@@ -161,7 +153,7 @@ const Notifications = () => {
     } else if (!current && isSubscribed) {
       unsubscribePush();
     }
-  }, [preferences?.pushNotify, isSubscribed, subscribePush, unsubscribePush]);
+  }, [preferences, preferences?.pushNotify, isSubscribed, subscribePush, unsubscribePush]);
 
   // Save preferences
   const handleSavePrefs = async (e) => {
@@ -187,8 +179,6 @@ const Notifications = () => {
   const filteredNotifications = activeTab === 'unread'
     ? notifications.filter(n => !n.isRead)
     : notifications;
-
-  const unreadInView = filteredNotifications.filter(n => !n.isRead).length;
 
   return (
     <div className="space-y-6 animate-fade-in">

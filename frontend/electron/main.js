@@ -419,6 +419,12 @@ ipcMain.handle('check-for-updates', async () => {
   }
 });
 
+ipcMain.handle('open-external', (_event, url) => {
+  if (typeof url === 'string' && (url.startsWith('https://') || url.startsWith('http://'))) {
+    require('electron').shell.openExternal(url);
+  }
+});
+
 ipcMain.handle('install-update', () => {
   if (!isDev) {
     stopBackend();

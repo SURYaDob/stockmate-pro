@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft, ClipboardList, Building2, AlertTriangle, Loader2,
@@ -39,11 +39,6 @@ const paymentStatusColors = {
   PENDING: { bg: 'bg-slate-100 dark:bg-slate-700', text: 'text-slate-600 dark:text-slate-300', dot: 'bg-slate-400', icon: Clock },
   OVERDUE: { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-700 dark:text-red-300', dot: 'bg-red-500', icon: AlertTriangle },
   CANCELLED: { bg: 'bg-slate-100 dark:bg-slate-700', text: 'text-slate-400 dark:text-slate-500', dot: 'bg-slate-300', icon: X },
-};
-
-const paymentMethodLabels = {
-  CASH: 'Cash', UPI: 'UPI', CARD: 'Card',
-  BANK_TRANSFER: 'Bank Transfer', CREDIT: 'Credit',
 };
 
 const GstRateLabels = {
@@ -101,7 +96,7 @@ const PurchaseDetail = () => {
     }
   }, []);
 
-  const fetchPurchase = async () => {
+  const fetchPurchase = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -127,11 +122,11 @@ const PurchaseDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     fetchPurchase();
-  }, [id]);
+  }, [fetchPurchase]);
 
   // Open receive modal
   const openReceiveModal = (data) => {
@@ -494,8 +489,7 @@ const PurchaseDetail = () => {
         ` : ''}
 
         <div class="footer">
-          <p>${footerText} | ${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
-          <p style="margin-top: 2px;">This is a computer-generated document.</p>
+          <p>${footerText} | ${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>              <p style="margin-top: 2px;">This is a computer-generated document.</p>
         </div>
 
         <div class="no-print" style="text-align: center; margin-top: 20px;">
@@ -789,10 +783,6 @@ const PurchaseDetail = () => {
                   </thead>
                   <tbody>
                     {purchase.items?.map((item, idx) => {
-                      const lineTotal = item.unitPrice * item.quantity;
-                      const gstPercent = parseInt((item.gstRate || 'RATE_18').replace('RATE_', ''));
-                      const gstAmount = Math.round(lineTotal * gstPercent / 100);
-                      const total = lineTotal + gstAmount;
                       const received = item.receivedQty || 0;
                       const remaining = item.quantity - received;
 
@@ -1296,7 +1286,7 @@ const PurchaseDetail = () => {
                     </span>
                   </div>
                   <p className="text-xs text-orange-500 mt-1">
-                    A debit note will be created against the supplier's ledger
+                    A debit note will be created against the supplier&apos;s ledger
                   </p>
                 </div>
               )}

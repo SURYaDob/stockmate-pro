@@ -40,7 +40,7 @@ const ForgotPassword = () => {
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
             {sent
               ? 'Check your email for the reset link'
-              : 'Enter your email and we\'ll send you a reset link'}
+              : 'Enter your email and we&apos;ll send you a reset link'}
           </p>
         </div>
 
@@ -72,7 +72,7 @@ const ForgotPassword = () => {
               Reset link sent to <strong>{email}</strong>
             </p>
             <p className="text-xs text-green-600 dark:text-green-400 mt-2">
-              Didn't receive it? Check your spam folder or{' '}
+              Didn&apos;t receive it? Check your spam folder or{' '}
               <button onClick={() => setSent(false)} className="underline font-medium">try again</button>
             </p>
           </div>

@@ -176,11 +176,7 @@ const SalesList = () => {
     setActionMenu(null);
   };
 
-  // Print Sales Register
-  const [registerPrinting, setRegisterPrinting] = useState(false);
-
   const handlePrintRegister = async () => {
-    setRegisterPrinting(true);
     try {
       // Fetch all filtered sales (unpaginated) for complete totals
       const params = new URLSearchParams();
@@ -479,8 +475,6 @@ const SalesList = () => {
     printWindow.document.close();
   } catch (err) {
     console.error('Failed to fetch register data:', err);
-  } finally {
-    setRegisterPrinting(false);
   }
   };
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft, Building2, Edit, AlertTriangle, Loader2,
@@ -40,7 +40,7 @@ const SupplierDetail = () => {
   const [paymentDesc, setPaymentDesc] = useState('');
   const [recordingPayment, setRecordingPayment] = useState(false);
 
-  const fetchSupplier = async () => {
+  const fetchSupplier = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -55,11 +55,11 @@ const SupplierDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     fetchSupplier();
-  }, [id]);
+  }, [fetchSupplier]);
 
   // Record payment
   const handleRecordPayment = async (e) => {
@@ -432,7 +432,6 @@ const SupplierDetail = () => {
                 <div className="space-y-0">
                   {ledger.map((entry, idx) => {
                     const isCredit = entry.type === 'PAYMENT' || entry.type === 'DEBIT_NOTE';
-                    const isDebit = entry.type === 'PURCHASE' || entry.type === 'CREDIT_NOTE';
                     return (
                       <div
                         key={entry.id}

@@ -5,7 +5,7 @@ import {
   ChevronLeft, ChevronRight, MoreVertical, Eye,
   AlertTriangle, X, Loader2,
   RefreshCw, Users, CreditCard, Wallet, ShoppingCart,
-  Edit, Phone, Mail, MapPin
+  Edit
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import api from '../../utils/api';

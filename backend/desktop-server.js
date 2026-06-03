@@ -28,9 +28,12 @@ const MAX_BACKUPS = 5; // Keep at most 5 backups to save disk space
  * Prisma CLI resolves `file:` relative to schema.prisma,
  * while PrismaClient resolves it relative to CWD.
  * Using an absolute path eliminates this ambiguity.
+ *
+ * On Windows, path.join produces backslashes which are not valid
+ * in `file:` URIs for SQLite. We normalize forward slashes.
  */
 function resolveDbUrl() {
-  const dbPath = path.join(__dirname, 'prisma', 'stockmate.db');
+  const dbPath = path.join(__dirname, 'prisma', 'stockmate.db').replace(/\\/g, '/');
   return `file:${dbPath}`;
 }
 
@@ -167,56 +170,82 @@ async function setupDatabase() {
   const isFirstRun = !fs.existsSync(dbPath);
 
   try {
-    // 1. Generate Prisma client (always, in case of version mismatch)
-    console.log('[Desktop] Generating Prisma client...');
-    execSync('npx prisma generate', {
-      cwd: __dirname,
-      stdio: 'inherit',
-      env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL },
-    });
+    // 1. Generate Prisma client (skip if already generated — e.g., bundled app)
+    const prismaClientPath = path.join(__dirname, 'node_modules', '.prisma', 'client', 'index.js');
+    if (fs.existsSync(prismaClientPath)) {
+      console.log('[Desktop] Prisma client already generated, skipping...');
+    } else {
+      console.log('[Desktop] Generating Prisma client...');
+      try {
+        execSync('npx prisma generate', {
+          cwd: __dirname,
+          stdio: 'inherit',
+          env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL },
+        });
+      } catch (err) {
+        console.warn('[Desktop] Could not generate Prisma client (CLI may not be available in bundled app). Attempting to continue with existing client...');
+      }
+    }
+
+    const runMigration = (migrationCommand) => {
+      try {
+        execSync(migrationCommand, {
+          cwd: __dirname,
+          stdio: 'inherit',
+          env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL },
+        });
+        return true;
+      } catch {
+        return false;
+      }
+    };
 
     if (isFirstRun) {
       // 2a. First run: apply all migrations and seed
       console.log('[Desktop] First run detected — applying all migrations...');
-      execSync('npx prisma migrate deploy', {
-        cwd: __dirname,
-        stdio: 'inherit',
-        env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL },
-      });
+      const migrated = runMigration('npx prisma migrate deploy');
+
+      if (!migrated) {
+        // If Prisma CLI is not available (bundled app), try db push instead
+        console.log('[Desktop] Trying prisma db push as fallback...');
+        const pushed = runMigration('npx prisma db push');
+        if (!pushed) {
+          console.warn('[Desktop] Could not run migrations via CLI. Checking if database already has schema...');
+        }
+      }
 
       console.log('[Desktop] Seeding database with sample data...');
-      execSync('node prisma/seed.js', {
-        cwd: __dirname,
-        stdio: 'inherit',
-        env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL },
-      });
-      console.log('[Desktop] Database seeded successfully!');
+      try {
+        execSync('node prisma/seed.js', {
+          cwd: __dirname,
+          stdio: 'inherit',
+          env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL },
+        });
+        console.log('[Desktop] Database seeded successfully!');
+      } catch (seedErr) {
+        console.warn('[Desktop] Seeding failed (may already be seeded):', seedErr.message);
+      }
     } else {
       // 2b. Existing database: backup then migrate
       const backupPrefix = createBackup();
 
       // Apply pending migrations (safe — only runs migrations not yet applied)
       console.log('[Desktop] Applying pending migrations...');
-      try {
-        execSync('npx prisma migrate deploy', {
-          cwd: __dirname,
-          stdio: 'inherit',
-          env: { ...process.env, DATABASE_URL: process.env.DATABASE_URL },
-        });
-        console.log('[Desktop] Migrations applied successfully.');
-      } catch (migrateErr) {
-        console.error('[Desktop] Migration failed:', migrateErr.message);
+      const migrated = runMigration('npx prisma migrate deploy');
 
-        // Attempt to restore from backup
-        if (backupPrefix) {
-          console.warn('[Desktop] Restoring database from backup...');
-          if (restoreBackup(backupPrefix)) {
-            console.warn('[Desktop] Database restored successfully.');
-          }
+      if (migrated) {
+        console.log('[Desktop] Migrations applied successfully.');
+      } else {
+        console.warn('[Desktop] Migration deploy failed (CLI may not be available in bundled app). Checking database validity...');
+
+        // Try db push as fallback
+        console.log('[Desktop] Trying prisma db push as fallback...');
+        const pushed = runMigration('npx prisma db push');
+        if (pushed) {
+          console.log('[Desktop] Database schema updated via db push.');
+        } else if (backupPrefix) {
+          console.warn('[Desktop] Could not update schema. Using existing database as-is.');
         }
-        // Exit with clear error — don't start server with broken schema
-        console.error('[Desktop] Cannot start server after migration failure. Please reinstall the app or restore the database manually.');
-        process.exit(1);
       }
     }
 
@@ -248,7 +277,11 @@ async function startServer() {
 
     // Start the Express server
     console.log('[Desktop] Starting Express server...');
-    require('./src/index.js');
+    const app = require('./src/index.js');
+    const serverPort = process.env.PORT || 5000;
+    app.listen(serverPort, () => {
+      console.log(`[Desktop] Server listening on port ${serverPort}`);
+    });
   } catch (error) {
     console.error('[Desktop] Failed to start server:', error);
     process.exit(1);

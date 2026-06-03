@@ -135,7 +135,12 @@ const sendOtp = catchAsync(async (req, res) => {
 const verifyOtp = catchAsync(async (req, res) => {
   const { email, otp } = req.body;
 
-  const user = await prisma.user.findUnique({ where: { email } });
+  const user = await prisma.user.findUnique({
+    where: { email },
+    include: {
+      branches: { include: { branch: true } },
+    },
+  });
   if (!user) throw new AppError('User not found', 404);
   if (user.otp !== otp || user.otpExpiry < new Date()) {
     throw new AppError('Invalid or expired OTP', 401, 'INVALID_OTP');
@@ -152,7 +157,9 @@ const verifyOtp = catchAsync(async (req, res) => {
     data: { refreshToken: tokens.refreshToken },
   });
 
-  sendSuccess(res, { ...tokens }, 'OTP verified successfully');
+  const { password: _, refreshToken: __, otp: _otp, otpExpiry: _oe, resetToken: _rt, resetTokenExp: _rte, ...safeUser } = user;
+
+  sendSuccess(res, { user: safeUser, ...tokens }, 'OTP verified successfully');
 });
 
 const refreshToken = catchAsync(async (req, res) => {

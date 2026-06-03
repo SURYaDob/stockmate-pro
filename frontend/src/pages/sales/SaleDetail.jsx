@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft, FileText, User, Package, Download, Loader2,
@@ -70,7 +70,7 @@ const SaleDetail = () => {
     }
   }, []);
 
-  const fetchSale = async () => {
+  const fetchSale = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -85,11 +85,11 @@ const SaleDetail = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     fetchSale();
-  }, [id]);
+  }, [fetchSale]);
 
   // POS-style Receipt print
   const handlePrintReceipt = () => {
