@@ -3,8 +3,8 @@ import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import {
   Warehouse, Mail, Lock, Eye, EyeOff, Loader2,
-  UserPlus, ShieldCheck, Phone, User, ArrowRight,
-  CheckCircle2, Zap, Palette, Droplet, Wrench
+  UserPlus, Phone, User, ArrowRight,
+  CheckCircle2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -12,16 +12,13 @@ const Auth = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const defaultTab = searchParams.get('tab') === 'register' ? 'register' : 'login';
-  const { login, register, sendOtp, verifyOtp, isAuthenticated, loading } = useAuthStore();
+  const { login, register, isAuthenticated } = useAuthStore();
 
   const [activeTab, setActiveTab] = useState(defaultTab);
-  const [isOtpMode, setIsOtpMode] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
   // Login form
-  const [loginForm, setLoginForm] = useState({ email: '', password: '', otp: '' });
-  const [otpSent, setOtpSent] = useState(false);
-  const [otpTimer, setOtpTimer] = useState(0);
+  const [loginForm, setLoginForm] = useState({ email: '', password: '' });
   const [loginErrors, setLoginErrors] = useState({});
   const [loginSubmitting, setLoginSubmitting] = useState(false);
 
@@ -36,23 +33,13 @@ const Auth = () => {
   // Redirect if already authenticated
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/', { replace: true });
+      navigate('/dashboard', { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
-  // OTP timer
-  useEffect(() => {
-    if (otpTimer > 0) {
-      const interval = setInterval(() => setOtpTimer((t) => t - 1), 1000);
-      return () => clearInterval(interval);
-    }
-  }, [otpTimer]);
-
-  // Switch tab resets OTP mode
+  // Switch tab
   const switchTab = (tab) => {
     setActiveTab(tab);
-    setIsOtpMode(false);
-    setOtpSent(false);
     setLoginErrors({});
     setRegErrors({});
   };
@@ -62,10 +49,8 @@ const Auth = () => {
     const errs = {};
     if (!loginForm.email) errs.email = 'Email is required';
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginForm.email)) errs.email = 'Invalid email address';
-    if (!isOtpMode && !loginForm.password) errs.password = 'Password is required';
-    else if (!isOtpMode && loginForm.password.length < 6) errs.password = 'Minimum 6 characters';
-    if (isOtpMode && !loginForm.otp) errs.otp = 'OTP is required';
-    else if (isOtpMode && loginForm.otp.length !== 6) errs.otp = 'OTP must be 6 digits';
+    if (!loginForm.password) errs.password = 'Password is required';
+    else if (loginForm.password.length < 6) errs.password = 'Minimum 6 characters';
     setLoginErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -99,35 +84,15 @@ const Auth = () => {
     if (regErrors[name]) setRegErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
-  const handleSendOtp = async () => {
-    if (!loginForm.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginForm.email)) {
-      setLoginErrors({ email: 'Enter a valid email first' });
-      return;
-    }
-    try {
-      await sendOtp(loginForm.email);
-      setOtpSent(true);
-      setOtpTimer(60);
-      toast.success('OTP sent to your email');
-    } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to send OTP');
-    }
-  };
-
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!validateLogin()) return;
     setLoginSubmitting(true);
     try {
-      let result;
-      if (isOtpMode) {
-        result = await verifyOtp(loginForm.email, loginForm.otp);
-      } else {
-        result = await login(loginForm.email, loginForm.password);
-      }
+      const result = await login(loginForm.email, loginForm.password);
       if (result.success) {
         toast.success('Welcome to StockMate Pro!');
-        navigate('/', { replace: true });
+        navigate('/dashboard', { replace: true });
       } else {
         toast.error(result.message || 'Login failed');
       }
@@ -152,7 +117,7 @@ const Auth = () => {
       });
       if (result.success) {
         toast.success('Account created! Welcome to StockMate Pro.');
-        navigate('/', { replace: true });
+        navigate('/dashboard', { replace: true });
       } else {
         toast.error(result.message || 'Registration failed');
       }
@@ -164,10 +129,9 @@ const Auth = () => {
   };
 
   const fillDemo = (email, password) => {
-    setLoginForm({ email, password, otp: '' });
+    setLoginForm({ email, password });
     setLoginErrors({});
     setActiveTab('login');
-    setIsOtpMode(false);
   };
 
   return (
@@ -216,38 +180,10 @@ const Auth = () => {
           </button>
         </div>
 
-        <div className="p-6 sm:p-8">
+        <div className="p-4 sm:p-8">
           {/* ─────────────── SIGN IN TAB ─────────────── */}
           {activeTab === 'login' && (
             <>
-              {/* Auth Mode Toggle */}
-              <div className="flex items-center justify-center gap-2 mb-6">
-                <button
-                  type="button"
-                  onClick={() => { setIsOtpMode(false); setLoginErrors({}); }}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all min-h-[40px] ${
-                    !isOtpMode
-                      ? 'bg-accent-500 text-white shadow-sm'
-                      : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-                  }`}
-                >
-                  <Lock size={16} className="inline mr-1.5" />
-                  Password
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setIsOtpMode(true); setLoginErrors({}); }}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all min-h-[40px] ${
-                    isOtpMode
-                      ? 'bg-accent-500 text-white shadow-sm'
-                      : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
-                  }`}
-                >
-                  <ShieldCheck size={16} className="inline mr-1.5" />
-                  OTP Login
-                </button>
-              </div>
-
               <form onSubmit={handleLogin} className="space-y-5">
                 {/* Email */}
                 <div>
@@ -269,86 +205,43 @@ const Auth = () => {
                   {loginErrors.email && <p className="mt-1.5 text-xs text-red-500">{loginErrors.email}</p>}
                 </div>
 
-                {/* Password (non-OTP) */}
-                {!isOtpMode && (
-                  <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <label htmlFor="login-password" className="label mb-0">Password</label>
-                      <Link to="/forgot-password" className="text-xs font-medium text-accent-500 hover:text-accent-600 transition-colors">
-                        Forgot?
-                      </Link>
-                    </div>
-                    <div className="relative">
-                      <Lock size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" strokeWidth={1.5} />
-                      <input
-                        id="login-password"
-                        name="password"
-                        type={showPassword ? 'text' : 'password'}
-                        value={loginForm.password}
-                        onChange={handleLoginChange}
-                        className={`input pl-11 pr-11 ${loginErrors.password ? 'border-red-500 focus:ring-red-500' : ''}`}
-                        placeholder="••••••••"
-                        autoComplete="current-password"
-                        disabled={loginSubmitting}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
-                      >
-                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                      </button>
-                    </div>
-                    {loginErrors.password && <p className="mt-1.5 text-xs text-red-500">{loginErrors.password}</p>}
+                {/* Password */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label htmlFor="login-password" className="label mb-0">Password</label>
+                    <Link to="/forgot-password" className="text-xs font-medium text-accent-500 hover:text-accent-600 transition-colors">
+                      Forgot?
+                    </Link>
                   </div>
-                )}
-
-                {/* OTP */}
-                {isOtpMode && (
-                  <div>
-                    <label htmlFor="login-otp" className="label">One-Time Password</label>
-                    <div className="relative">
-                      <ShieldCheck size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" strokeWidth={1.5} />
-                      <input
-                        id="login-otp"
-                        name="otp"
-                        type="text"
-                        value={loginForm.otp}
-                        onChange={handleLoginChange}
-                        maxLength={6}
-                        className={`input pl-11 text-center text-lg tracking-[0.5em] font-mono ${loginErrors.otp ? 'border-red-500 focus:ring-red-500' : ''}`}
-                        placeholder="••••••"
-                        autoComplete="one-time-code"
-                        disabled={loginSubmitting || !otpSent}
-                      />
-                    </div>
-                    {loginErrors.otp && <p className="mt-1.5 text-xs text-red-500">{loginErrors.otp}</p>}
-                    <div className="mt-3">
-                      {!otpSent ? (
-                        <button type="button" onClick={handleSendOtp}
-                          className="btn btn-sm bg-accent-500/10 text-accent-600 dark:text-accent-400 hover:bg-accent-500/20 w-full"
-                          disabled={loading}
-                        >
-                          {loading ? <Loader2 size={16} className="animate-spin" /> : <ShieldCheck size={16} />}
-                          Send OTP
-                        </button>
-                      ) : (
-                        <button type="button" onClick={handleSendOtp}
-                          className="btn btn-sm bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 w-full"
-                          disabled={otpTimer > 0}
-                        >
-                          {otpTimer > 0 ? `Resend in ${otpTimer}s` : 'Resend OTP'}
-                        </button>
-                      )}
-                    </div>
+                  <div className="relative">
+                    <Lock size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" strokeWidth={1.5} />
+                    <input
+                      id="login-password"
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      value={loginForm.password}
+                      onChange={handleLoginChange}
+                      className={`input pl-11 pr-11 ${loginErrors.password ? 'border-red-500 focus:ring-red-500' : ''}`}
+                      placeholder="••••••••"
+                      autoComplete="current-password"
+                      disabled={loginSubmitting}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
                   </div>
-                )}
+                  {loginErrors.password && <p className="mt-1.5 text-xs text-red-500">{loginErrors.password}</p>}
+                </div>
 
                 <button type="submit" className="btn-primary w-full" disabled={loginSubmitting}>
                   {loginSubmitting ? (
                     <><Loader2 size={18} className="animate-spin" /> Signing in...</>
                   ) : (
-                    <><Lock size={18} /> {isOtpMode ? 'Verify OTP & Sign In' : 'Sign In'}</>
+                    <><Lock size={18} /> Sign In</>
                   )}
                 </button>
               </form>
@@ -503,30 +396,7 @@ const Auth = () => {
         </div>
       </div>
 
-      {/* Category badges */}
-      <div className="text-center mt-6">
-        <p className="text-xs text-slate-400 mb-3">Manage all your business categories</p>
-        <div className="flex items-center justify-center gap-3">
-          {[
-            { icon: Zap, label: 'Electrical', color: 'text-amber-500' },
-            { icon: Palette, label: 'Paint', color: 'text-rose-500' },
-            { icon: Droplet, label: 'Plumbing', color: 'text-cyan-500' },
-            { icon: Wrench, label: 'Hardware', color: 'text-accent-500' },
-          ].map((cat) => (
-            <div key={cat.label} className="flex items-center gap-1.5 text-xs text-slate-400">
-              <cat.icon size={14} className={cat.color} />
-              {cat.label}
-            </div>
-          ))}
-        </div>
-      </div>
 
-      {/* Back to Landing */}
-      <div className="text-center mt-4">
-        <Link to="/" className="text-sm text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
-          ← Back to home
-        </Link>
-      </div>
     </div>
   );
 };

@@ -6,8 +6,6 @@ const { generateTokens } = require('../middleware/auth.middleware');
 const { sendSuccess } = require('../utils/response');
 const { sendEmail } = require('../utils/mail');
 const {
-  buildOtpEmailHtml,
-  buildOtpEmailText,
   buildResetPasswordHtml,
   buildResetPasswordText,
 } = require('../templates/otpEmail');
@@ -92,74 +90,9 @@ const login = catchAsync(async (req, res) => {
     },
   });
 
-  const { password: _, refreshToken: __, otp, otpExpiry, resetToken, resetTokenExp, ...safeUser } = user;
+  const { password: _, refreshToken: __, resetToken, resetTokenExp, ...safeUser } = user;
 
   sendSuccess(res, { user: safeUser, ...tokens }, 'Login successful');
-});
-
-const sendOtp = catchAsync(async (req, res) => {
-  const { email } = req.body;
-  const user = await prisma.user.findUnique({ where: { email } });
-  if (!user) throw new AppError('User not found', 404);
-
-  const otp = Math.floor(100000 + Math.random() * 900000).toString();
-  const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
-
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { otp, otpExpiry },
-  });
-
-  // Send OTP via email
-  try {
-    await sendEmail({
-      to: email,
-      subject: `Your OTP Code: ${otp}`,
-      html: buildOtpEmailHtml({ otp, firstName: user.firstName }),
-      text: buildOtpEmailText({ otp, firstName: user.firstName }),
-    });
-  } catch (err) {
-    console.error('[Auth] Failed to send OTP email:', err.message);
-    // In production, let the user know the email didn't go through
-    if (process.env.NODE_ENV === 'production') {
-      throw new AppError('Failed to send OTP email. Please check your email configuration or try again later.', 500, 'EMAIL_FAILED');
-    }
-  }
-
-  // Always log to console for fallback/debug
-  console.log(`\x1b[33m[DEV] OTP for ${email}: ${otp}\x1b[0m`);
-
-  sendSuccess(res, { otp: process.env.NODE_ENV === 'development' ? otp : undefined }, 'OTP sent successfully');
-});
-
-const verifyOtp = catchAsync(async (req, res) => {
-  const { email, otp } = req.body;
-
-  const user = await prisma.user.findUnique({
-    where: { email },
-    include: {
-      branches: { include: { branch: true } },
-    },
-  });
-  if (!user) throw new AppError('User not found', 404);
-  if (user.otp !== otp || user.otpExpiry < new Date()) {
-    throw new AppError('Invalid or expired OTP', 401, 'INVALID_OTP');
-  }
-
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { otp: null, otpExpiry: null },
-  });
-
-  const tokens = generateTokens(user.id, user.role);
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { refreshToken: tokens.refreshToken },
-  });
-
-  const { password: _, refreshToken: __, otp: _otp, otpExpiry: _oe, resetToken: _rt, resetTokenExp: _rte, ...safeUser } = user;
-
-  sendSuccess(res, { user: safeUser, ...tokens }, 'OTP verified successfully');
 });
 
 const refreshToken = catchAsync(async (req, res) => {
@@ -258,17 +191,12 @@ const resetPassword = catchAsync(async (req, res) => {
 const getMe = catchAsync(async (req, res) => {
   const user = await prisma.user.findUnique({
     where: { id: req.user.id },
-    include: {
-      branches: {
-        include: { branch: true },
-      },
-    },
     select: {
       id: true, email: true, firstName: true, lastName: true, phone: true,
       role: true, avatar: true, theme: true, language: true, isActive: true,
       lastLogin: true, createdAt: true,
       branches: {
-        include: {
+        select: {
           branch: true,
         },
       },
@@ -290,4 +218,4 @@ const updateProfile = catchAsync(async (req, res) => {
   sendSuccess(res, user, 'Profile updated');
 });
 
-module.exports = { register, login, sendOtp, verifyOtp, refreshToken, logout, forgotPassword, resetPassword, getMe, updateProfile };
+module.exports = { register, login, refreshToken, logout, forgotPassword, resetPassword, getMe, updateProfile };

@@ -42,8 +42,6 @@ model User {
   isActive      Boolean   @default(true)
   theme         String    @default("light")
   language      String    @default("en")
-  otp           String?
-  otpExpiry     DateTime?
   resetToken    String?
   resetTokenExp DateTime?
   refreshToken  String?
@@ -324,6 +322,9 @@ model Purchase {
   paidAmount      Int      @default(0)
   balanceAmount   Int      @default(0)
   paymentStatus   String   @default("PENDING")
+  paymentMethod   String?
+  discountType    String?
+  discountValue   Int?
   notes           String?
   isReturn        Boolean  @default(false)
   createdAt       DateTime @default(now())

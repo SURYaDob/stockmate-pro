@@ -73,23 +73,6 @@ const useAuthStore = create(
         localStorage.removeItem('auth-storage');
       },
 
-      sendOtp: async (email) => {
-        const res = await api.post('/auth/send-otp', { email });
-        return res.data;
-      },
-
-      verifyOtp: async (email, otp) => {
-        const res = await api.post('/auth/verify-otp', { email, otp });
-        const { user, accessToken, refreshToken } = res.data.data;
-        set({
-          user: user || null,
-          token: accessToken,
-          refreshToken,
-          isAuthenticated: true,
-        });
-        return { success: true };
-      },
-
       refreshAuth: async () => {
         const { refreshToken: rt } = get();
         if (!rt) return false;

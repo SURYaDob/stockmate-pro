@@ -24,7 +24,10 @@
     "forgotPassword": "पासवर्ड विसरलात?",
     "resetPassword": "पासवर्ड रीसेट",
     "selectCategory": "तुमची व्यवसाय श्रेणी निवडा",
-    "loginTo": "स्टॉकमेट प्रो मध्ये लॉग इन करा"
+    "loginTo": "स्टॉकमेट प्रो मध्ये लॉग इन करा",
+    "signIn": "साइन इन",
+    "createAccount": "खाते तयार करा",
+    "demoCredentials": "डेमो क्रेडेंशियल्स"
   },
   "inventory": {
     "title": "इन्व्हेंटरी",

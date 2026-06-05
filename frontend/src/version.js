@@ -4,13 +4,28 @@ const STORAGE_KEY = 'stockmate_seen_version';
  * Current app version. Bump this when deploying significant updates.
  * The 'What's new' dialog will show for users upgrading from an older version.
  */
-export const APP_VERSION = '1.1.0';
+export const APP_VERSION = '2.0.0';
 
 /**
  * Release notes displayed in the 'What's new' dialog.
  * Add entries for each new version to inform users about changes.
  */
 export const RELEASE_NOTES = {
+  '2.0.0': [
+    '🖥️ Cross-platform desktop app using Electron — runs on Windows, macOS, and Linux',
+    '💾 Local SQLite database — no server setup required, data stays on your machine',
+    '🔄 Automatic updates via GitHub Releases — always stay up to date',
+    '📦 Offline-first architecture — works without internet',
+    '🔐 Enhanced login with password reset flow',
+    '📊 Advanced Reports — 8 report types (Sales, Purchases, P&L, GST, Inventory, Low Stock, Dead Stock, Audit)',
+    '👥 Customer management with full ledger, payments, and credit notes',
+    '💳 Expense tracking with category breakdown and filters',
+    '👔 Employee management with attendance tracking and clock in/out',
+    '📋 Purchase Order improvements — discount handling, payment tracking, stock receiving',
+    '🔔 Notification system with preferences and push notifications',
+    '🎨 Refined UI with dark/light theme, improved responsive design',
+    '🌐 Multi-language support (English, Hindi, Marathi)',
+  ],
   '1.1.0': [
     '📱 Improved PWA experience — install banner, offline indicator, and faster loading',
     '🔔 Notification dropdown in header with recent alerts and quick actions',
