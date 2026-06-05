@@ -110,16 +110,22 @@ if %ERRORLEVEL% NEQ 0 (
 )
 echo [OK] Frontend dependencies installed
 
-:: ----- Generate Prisma client -----
+:: ----- Generate Prisma client (with EPERM retry) -----
 echo.
 echo [~] Generating Prisma client...
 cd /d "%~dp0backend"
-call npx prisma generate
+call npx prisma generate 2>nul
 if %ERRORLEVEL% NEQ 0 (
-    echo [X] Prisma generate failed.
-    echo     Check your database configuration in backend\.env
-    pause
-    exit /b 1
+    echo [!] Prisma generate failed — retrying after cache clear...
+    if exist "node_modules\.prisma\client" rmdir /s /q "node_modules\.prisma\client"
+    call npx prisma generate
+    if %ERRORLEVEL% NEQ 0 (
+        echo [X] Prisma generate failed.
+        echo     This is usually a Windows file-lock issue.
+        echo     Try restarting your computer or run:^r^n    echo     cd backend ^&^& rmdir /s /q node_modules\.prisma ^&^& npx prisma generate
+        pause
+        exit /b 1
+    )
 )
 echo [OK] Prisma client generated
 

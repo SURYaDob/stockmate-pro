@@ -28,8 +28,9 @@ const fs = require('fs');
 
 const paise = (rupees) => Math.round(rupees * 100);
 const resolveDbPath = () => {
-  // Resolve the absolute DB path used by the seed script
-  const p = path.join(__dirname, '..', '..', 'prisma', 'stockmate.db');
+  // Use nested path to match Prisma's resolution of 'file:./prisma/stockmate.db'
+  // from schema.prisma (backend/prisma/schema.prisma -> backend/prisma/prisma/stockmate.db)
+  const p = path.join(__dirname, '..', '..', 'prisma', 'prisma', 'stockmate.db');
   return p.replace(/\\/g, '/');
 };
 

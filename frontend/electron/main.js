@@ -41,7 +41,8 @@ let isQuitting = false;
  */
 function getDatabaseUrl() {
   if (isDev) {
-    const dbPath = path.join(__dirname, '..', '..', 'backend', 'prisma', 'stockmate.db');
+    // Use nested path to match schema.prisma resolution of 'file:./prisma/stockmate.db'
+    const dbPath = path.join(__dirname, '..', '..', 'backend', 'prisma', 'prisma', 'stockmate.db');
     return `file:${dbPath}`;
   }
   // In production, store database in user data directory for persistence

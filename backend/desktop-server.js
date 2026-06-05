@@ -33,12 +33,15 @@ const MAX_BACKUPS = 5; // Keep at most 5 backups to save disk space
  * in `file:` URIs for SQLite. We normalize forward slashes.
  */
 function resolveDbUrl() {
-  const dbPath = path.join(__dirname, 'prisma', 'stockmate.db').replace(/\\/g, '/');
+  // Use nested path to match schema.prisma's DATABASE_URL resolution
+  // schema.prisma resolves 'file:./prisma/stockmate.db' from its location
+  // at backend/prisma/schema.prisma → backend/prisma/prisma/stockmate.db
+  const dbPath = path.join(__dirname, 'prisma', 'prisma', 'stockmate.db').replace(/\\/g, '/');
   return `file:${dbPath}`;
 }
 
 function getDbFilePath() {
-  return path.join(__dirname, 'prisma', 'stockmate.db');
+  return path.join(__dirname, 'prisma', 'prisma', 'stockmate.db');
 }
 
 // ─── Load environment ───────────────────────────────────────────────────────
@@ -48,8 +51,10 @@ if (fs.existsSync(envPath)) {
   require('dotenv').config({ path: envPath });
 }
 
-// Always force the correct absolute DATABASE_URL for SQLite
-process.env.DATABASE_URL = resolveDbUrl();
+// Set DATABASE_URL only if not already set (Electron main.js may already set it)
+if (!process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = resolveDbUrl();
+}
 
 // Set production defaults (only if not already set)
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
