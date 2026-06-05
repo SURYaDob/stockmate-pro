@@ -64,7 +64,7 @@ const ForgotPassword = () => {
             </button>
           </form>
         ) : (
-          <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-6 text-center">
+          <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4 text-center">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 mb-3">
               <Send size={24} className="text-green-600 dark:text-green-400" />
             </div>

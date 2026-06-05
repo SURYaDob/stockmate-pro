@@ -303,7 +303,7 @@ function setupAutoUpdater() {
 
   // Don't check if the app was not installed via an installer (e.g. portable)
   // electron-updater requires the app to be properly installed
-  autoUpdater.autoDownload = false;
+  autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
 
   autoUpdater.on('checking-for-update', () => {
@@ -312,28 +312,15 @@ function setupAutoUpdater() {
 
   autoUpdater.on('update-available', (info) => {
     console.log(`[Update] Update available: v${info.version}`);
-    // Notify renderer that an update is available
+    // Notify renderer — the in-app UpdateBanner handles showing progress
+    // and the Restart & Install button. Auto-download is enabled, so
+    // the update downloads automatically in the background.
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('update-available', {
         version: info.version,
         releaseDate: info.releaseDate,
       });
     }
-    // Prompt user to download
-    dialog
-      .showMessageBox(mainWindow, {
-        type: 'info',
-        title: 'Update Available',
-        message: `A new version (v${info.version}) is available.\n\nWould you like to download and install it now?`,
-        buttons: ['Download', 'Later'],
-        defaultId: 0,
-        cancelId: 1,
-      })
-      .then(({ response }) => {
-        if (response === 0) {
-          autoUpdater.downloadUpdate();
-        }
-      });
   });
 
   autoUpdater.on('update-not-available', () => {
@@ -355,28 +342,12 @@ function setupAutoUpdater() {
 
   autoUpdater.on('update-downloaded', (info) => {
     console.log(`[Update] Update downloaded: v${info.version}`);
-    // Notify renderer
+    // Notify renderer — the in-app UpdateBanner shows a "Restart & Install" button
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('update-downloaded', {
         version: info.version,
       });
     }
-    // Prompt to restart
-    dialog
-      .showMessageBox(mainWindow, {
-        type: 'info',
-        title: 'Update Ready',
-        message: `Version v${info.version} has been downloaded.\n\nThe application needs to restart to apply the update.`,
-        buttons: ['Restart Now', 'Later'],
-        defaultId: 0,
-        cancelId: 1,
-      })
-      .then(({ response }) => {
-        if (response === 0) {
-          stopBackend();
-          autoUpdater.quitAndInstall(false, true);
-        }
-      });
   });
 
   autoUpdater.on('error', (err) => {

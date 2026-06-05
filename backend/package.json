@@ -12,6 +12,7 @@
     "migrate": "npx prisma migrate dev",
     "migrate:prod": "npx prisma migrate deploy",
     "seed": "node prisma/seed.js",
+    "seed:test": "node prisma/seed.test.js",
     "studio": "npx prisma studio",
     "generate": "npx prisma generate"
   },
@@ -19,7 +20,7 @@
     "seed": "node prisma/seed.js"
   },
   "dependencies": {
-    "@prisma/client": "^5.10.0",
+    "@prisma/client": "^5.22.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",

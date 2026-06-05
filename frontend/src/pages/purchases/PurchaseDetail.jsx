@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft, ClipboardList, Building2, AlertTriangle, Loader2,
@@ -81,20 +81,15 @@ const PurchaseDetail = () => {
 
   // Company profile for print/PDF layout
   const [companyProfile, setCompanyProfile] = useState(null);
-
-  // Search params for action
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const action = params.get('action');
-    // We'll set these after purchase is loaded
-    if (action === 'receive') {
-      // Flag to auto-open receive modal after data loads
-      window.__openReceiveModal = true;
-    }
-    if (action === 'payment') {
-      window.__openPaymentModal = true;
-    }
-  }, []);
+  
+  // Auto-open modals from URL search params (action=receive or action=payment)
+  // Using useRef to avoid causing re-renders when flags are cleared after use
+  const autoOpenReceive = useRef(
+    new URLSearchParams(window.location.search).get('action') === 'receive'
+  );
+  const autoOpenPayment = useRef(
+    new URLSearchParams(window.location.search).get('action') === 'payment'
+  );
 
   const fetchPurchase = useCallback(async () => {
     setLoading(true);
@@ -109,13 +104,13 @@ const PurchaseDetail = () => {
       setCompanyProfile(profileRes.data.data);
 
       // Auto-open receive modal if flagged
-      if (window.__openReceiveModal && data.status !== 'RECEIVED' && data.status !== 'CANCELLED') {
+      if (autoOpenReceive.current && data.status !== 'RECEIVED' && data.status !== 'CANCELLED') {
         openReceiveModal(data);
-        window.__openReceiveModal = false;
+        autoOpenReceive.current = false;
       }
-      if (window.__openPaymentModal && data.balanceAmount > 0) {
+      if (autoOpenPayment.current && data.balanceAmount > 0) {
         setPaymentModal(true);
-        window.__openPaymentModal = false;
+        autoOpenPayment.current = false;
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load purchase order');
@@ -588,7 +583,7 @@ const PurchaseDetail = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 animate-fade-in">
         <div className="flex items-center gap-4">
           <div className="skeleton h-10 w-10 rounded-lg" />
           <div>
@@ -596,9 +591,9 @@ const PurchaseDetail = () => {
             <div className="skeleton h-4 w-40" />
           </div>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="card p-6 space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2 space-y-4">
+            <div className="card p-4 space-y-4">
               {[1, 2, 3, 4, 5].map(i => (
                 <div key={i} className="flex justify-between">
                   <div className="skeleton h-4 w-24" />
@@ -606,14 +601,14 @@ const PurchaseDetail = () => {
                 </div>
               ))}
             </div>
-            <div className="card p-6">
+            <div className="card p-4">
               <div className="skeleton h-6 w-24 mb-4" />
               {[1, 2, 3].map(i => (
                 <div key={i} className="skeleton h-12 w-full mb-2" />
               ))}
             </div>
           </div>
-          <div className="card p-6 space-y-4">
+          <div className="card p-4 space-y-4">
             {[1, 2, 3].map(i => (
               <div key={i} className="skeleton h-16 w-full rounded-lg" />
             ))}
@@ -626,7 +621,7 @@ const PurchaseDetail = () => {
   // Error state
   if (error) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 animate-fade-in">
         <div className="flex items-center gap-4">
           <Link to="/purchases" className="btn-ghost p-2">
             <ArrowLeft size={20} />
@@ -657,7 +652,7 @@ const PurchaseDetail = () => {
   const canReceive = purchase.status !== 'RECEIVED' && purchase.status !== 'CANCELLED';
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
@@ -708,12 +703,12 @@ const PurchaseDetail = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Main */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4">
           {/* Totals card */}
           <div className="card">
-            <div className="p-6">
+            <div className="p-4">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50">
                   <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Subtotal</p>
@@ -847,7 +842,7 @@ const PurchaseDetail = () => {
               <div className="card-header">
                 <h2 className="text-base font-semibold text-slate-800 dark:text-slate-200">Supplier Invoice</h2>
               </div>
-              <div className="card-body flex gap-6">
+              <div className="card-body flex gap-4">
                 {purchase.supplierInvoice && (
                   <div>
                     <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Invoice No</p>
@@ -878,7 +873,7 @@ const PurchaseDetail = () => {
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Supplier */}
           <div className="card">
             <div className="card-header">
@@ -1085,13 +1080,13 @@ const PurchaseDetail = () => {
       {receiveModal && (
         <div className="modal-overlay" onClick={() => setReceiveModal(false)}>
           <div className="modal-content max-w-lg" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700">
               <h2 className="text-lg font-semibold">Receive Stock</h2>
               <button onClick={() => setReceiveModal(false)} className="btn-ghost p-2">
                 <X size={20} />
               </button>
             </div>
-            <form onSubmit={handleReceiveStock} className="p-6 space-y-4">
+            <form onSubmit={handleReceiveStock} className="p-4 space-y-4">
               {receiveError && (
                 <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-sm text-red-600 dark:text-red-400">
                   <AlertTriangle size={16} />
@@ -1185,7 +1180,7 @@ const PurchaseDetail = () => {
       {returnModal && (
         <div className="modal-overlay" onClick={() => setReturnModal(false)}>
           <div className="modal-content max-w-lg" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700">
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <RotateCcw size={20} className="text-orange-500" />
                 Return to Supplier
@@ -1194,7 +1189,7 @@ const PurchaseDetail = () => {
                 <X size={20} />
               </button>
             </div>
-            <form onSubmit={handleReturn} className="p-6 space-y-4">
+            <form onSubmit={handleReturn} className="p-4 space-y-4">
               {returnError && (
                 <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-sm text-red-600 dark:text-red-400">
                   <AlertTriangle size={16} />
@@ -1210,7 +1205,7 @@ const PurchaseDetail = () => {
               {/* Return items */}
               <div className="max-h-64 overflow-y-auto space-y-3">
                 {returnItems.length === 0 ? (
-                  <div className="text-center py-6">
+                  <div className="text-center py-4">
                     <RotateCcw size={32} className="mx-auto text-slate-300 dark:text-slate-600 mb-2" />
                     <p className="text-sm text-slate-400">No items have been received yet</p>
                   </div>
@@ -1328,7 +1323,7 @@ const PurchaseDetail = () => {
       {emailModal && (
         <div className="modal-overlay" onClick={() => { if (!sendingEmail) setEmailModal(false); }}>
           <div className="modal-content max-w-md" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700">
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <Mail size={20} className="text-purple-500" />
                 Email Purchase Order
@@ -1349,7 +1344,7 @@ const PurchaseDetail = () => {
                 </p>
               </div>
             ) : (
-              <form onSubmit={handleEmailPO} className="p-6 space-y-5">
+              <form onSubmit={handleEmailPO} className="p-5 space-y-5">
                 {emailError && (
                   <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-sm text-red-600 dark:text-red-400">
                     <AlertTriangle size={16} />
@@ -1441,13 +1436,13 @@ const PurchaseDetail = () => {
       {paymentModal && (
         <div className="modal-overlay" onClick={() => setPaymentModal(false)}>
           <div className="modal-content max-w-md" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700">
               <h2 className="text-lg font-semibold">Record Payment</h2>
               <button onClick={() => setPaymentModal(false)} className="btn-ghost p-2">
                 <X size={20} />
               </button>
             </div>
-            <form onSubmit={handleRecordPayment} className="p-6 space-y-5">
+            <form onSubmit={handleRecordPayment} className="p-5 space-y-5">
               {/* Current balance info */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50">

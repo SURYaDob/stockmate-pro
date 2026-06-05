@@ -90,7 +90,7 @@ const SupplierList = () => {
   // Loading skeleton
   if (loading && suppliers.length === 0) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 animate-fade-in">
         <div className="page-header">
           <div>
             <div className="skeleton h-8 w-40 mb-2" />
@@ -124,7 +124,7 @@ const SupplierList = () => {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 animate-fade-in">
       {/* Header */}
       <div className="page-header">
         <div>
@@ -276,7 +276,7 @@ const SupplierList = () => {
       {/* Error state */}
       {error && (
         <div className="card border-red-200 dark:border-red-800">
-          <div className="p-6 text-center">
+          <div className="p-4 text-center">
             <AlertTriangle size={40} className="mx-auto mb-3 text-red-400" />
             <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-1">Failed to Load</h3>
             <p className="text-sm text-slate-500 mb-4">{error}</p>

@@ -190,7 +190,7 @@ const Expenses = () => {
     .slice(0, 5);
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 animate-fade-in">
       {/* Header */}
       <div className="page-header">
         <div>
@@ -371,7 +371,7 @@ const Expenses = () => {
       {/* Error state */}
       {error && !loading && (
         <div className="card border-red-200 dark:border-red-800">
-          <div className="p-6 text-center">
+          <div className="p-4 text-center">
             <AlertTriangle size={40} className="mx-auto mb-3 text-red-400" />
             <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-1">Failed to Load</h3>
             <p className="text-sm text-slate-500 mb-4">{error}</p>
@@ -593,11 +593,11 @@ const Expenses = () => {
       {showModal && (
         <div className="modal-overlay" onClick={() => setShowModal(false)}>
           <div className="modal-content max-w-md" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700">
               <h2 className="text-lg font-semibold">{editingId ? 'Edit Expense' : 'Add Expense'}</h2>
               <button onClick={() => setShowModal(false)} className="btn-ghost p-2"><X size={20} /></button>
             </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-5">
+            <form onSubmit={handleSubmit} className="p-5 space-y-5">
               {saveError && (
                 <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-600 dark:text-red-400">
                   <AlertTriangle size={16} />

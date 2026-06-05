@@ -124,6 +124,7 @@ jobs:
         if: success() && startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
+          draft: false
           files: |
             frontend/release/*.exe
             frontend/release/*.dmg

@@ -664,7 +664,7 @@ const SaleDetail = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 animate-fade-in">
         <div className="flex items-center gap-4">
           <div className="skeleton h-10 w-10 rounded-lg" />
           <div>
@@ -672,9 +672,9 @@ const SaleDetail = () => {
             <div className="skeleton h-4 w-40" />
           </div>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="card p-6 space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2 space-y-4">
+            <div className="card p-4 space-y-4">
               {[1, 2, 3, 4, 5].map(i => (
                 <div key={i} className="flex justify-between">
                   <div className="skeleton h-4 w-24" />
@@ -682,14 +682,14 @@ const SaleDetail = () => {
                 </div>
               ))}
             </div>
-            <div className="card p-6">
+            <div className="card p-4">
               <div className="skeleton h-6 w-24 mb-4" />
               {[1, 2, 3].map(i => (
                 <div key={i} className="skeleton h-12 w-full mb-2" />
               ))}
             </div>
           </div>
-          <div className="card p-6 space-y-4">
+          <div className="card p-4 space-y-4">
             {[1, 2, 3].map(i => (
               <div key={i} className="skeleton h-16 w-full rounded-lg" />
             ))}
@@ -702,7 +702,7 @@ const SaleDetail = () => {
   // Error state
   if (error) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 animate-fade-in">
         <div className="flex items-center gap-4">
           <Link to="/sales" className="btn-ghost p-2">
             <ArrowLeft size={20} />
@@ -730,7 +730,7 @@ const SaleDetail = () => {
   const StatusIcon = statusColor.icon;
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
@@ -781,12 +781,12 @@ const SaleDetail = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Main - Items */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4">
           {/* Totals card */}
           <div className="card">
-            <div className="p-6">
+            <div className="p-4">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50">
                   <p className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Subtotal</p>
@@ -913,7 +913,7 @@ const SaleDetail = () => {
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Customer */}
           <div className="card">
             <div className="card-header">
@@ -1083,7 +1083,7 @@ const SaleDetail = () => {
       {emailModal && (
         <div className="modal-overlay" onClick={() => { if (!sendingEmail) setEmailModal(false); }}>
           <div className="modal-content max-w-md" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700">
               <h2 className="text-lg font-semibold flex items-center gap-2">
                 <Mail size={20} className="text-purple-500" />
                 Email Invoice
@@ -1104,7 +1104,7 @@ const SaleDetail = () => {
                 </p>
               </div>
             ) : (
-              <form onSubmit={handleEmailInvoice} className="p-6 space-y-5">
+              <form onSubmit={handleEmailInvoice} className="p-5 space-y-5">
                 {emailError && (
                   <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-sm text-red-600 dark:text-red-400">
                     <AlertTriangle size={16} />
@@ -1196,13 +1196,13 @@ const SaleDetail = () => {
       {paymentModal && (
         <div className="modal-overlay" onClick={() => setPaymentModal(false)}>
           <div className="modal-content max-w-md" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700">
               <h2 className="text-lg font-semibold">Record Payment</h2>
               <button onClick={() => setPaymentModal(false)} className="btn-ghost p-2">
                 <X size={20} />
               </button>
             </div>
-            <form onSubmit={handleRecordPayment} className="p-6 space-y-5">
+            <form onSubmit={handleRecordPayment} className="p-5 space-y-5">
               {/* Current balance info */}
               <div className="grid grid-cols-2 gap-4">
                 <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50">

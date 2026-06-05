@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   BarChart3, TrendingUp, Package, ShoppingCart, Truck,
   AlertTriangle, DollarSign, Loader2, Filter,
@@ -76,8 +76,13 @@ const Reports = () => {
     }
   }, [activeReport, startDate, endDate, page]);
 
+  // Auto-fetch report on mount and when dependencies change
+  useEffect(() => {
+    fetchReport();
+  }, [fetchReport]);
+
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 animate-fade-in">
       {/* Header */}
       <div className="page-header">
         <div>
@@ -207,7 +212,7 @@ const SalesReport = ({ data, formatPrice, formatDate }) => {
   ].filter(i => i.value > 0);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <SummaryCard icon={ShoppingCart} label="Total Sales" value={summary.totalSales || 0} color="bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30" />
         <SummaryCard icon={DollarSign} label="Revenue" value={formatPrice(summary.totalRevenue)} color="bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30" />
@@ -277,7 +282,7 @@ const PurchaseReport = ({ data, formatPrice, formatDate }) => {
   const { purchases = [], summary = {} } = data;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <SummaryCard icon={Truck} label="Total Orders" value={summary.totalOrders || 0} color="bg-blue-100 text-blue-600" />
         <SummaryCard icon={DollarSign} label="Total Amount" value={formatPrice(summary.totalAmount)} color="bg-emerald-100 text-emerald-600" />
@@ -321,14 +326,14 @@ const ProfitLossReport = ({ data, formatPrice }) => {
   if (!data) return <EmptyReport message="Select date range and click Refresh to load P&L report" />;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <SummaryCard icon={ShoppingCart} label="Revenue" value={formatPrice(data.revenue)} color="bg-emerald-100 text-emerald-600" />
         <SummaryCard icon={Package} label="COGS" value={formatPrice(data.cogs)} color="bg-orange-100 text-orange-600" />
         <SummaryCard icon={TrendingUp} label={`Gross Profit (${data.grossMargin}%)`} value={formatPrice(data.grossProfit)} color="bg-indigo-100 text-indigo-600" />
         <SummaryCard icon={DollarSign} label={`Net Profit (${data.netMargin}%)`} value={formatPrice(data.netProfit)} color="bg-blue-100 text-blue-600" />
       </div>
-      <div className="card p-6">
+      <div className="card p-4">
         <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100 mb-4">Detailed Breakdown</h3>
         <div className="space-y-4">
           <div className="flex justify-between items-center p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50">
@@ -375,7 +380,7 @@ const InventoryValuationReport = ({ data, formatPrice }) => {
   const { items = [], summary = {} } = data;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <SummaryCard icon={Package} label="Total Items" value={summary.totalItems || 0} color="bg-blue-100 text-blue-600" />
         <SummaryCard icon={DollarSign} label="Total Cost" value={formatPrice(summary.totalCost)} color="bg-amber-100 text-amber-600" />
@@ -424,8 +429,8 @@ const GstReport = ({ data, formatPrice, formatDate }) => {
   if (!data) return <EmptyReport message="Select date range and click Refresh to load GST report" />;
 
   return (
-    <div className="space-y-6">
-      <div className="card p-6">
+    <div className="space-y-4">
+      <div className="card p-4">
         <h3 className="text-base font-semibold text-slate-800 dark:text-slate-100 mb-4">GST Summary</h3>
         {data.gstSummary && Object.keys(data.gstSummary).length > 0 ? (
           <div className="overflow-x-auto">
@@ -533,7 +538,7 @@ const LowStockReport = ({ data }) => {
   );
 };
 
-const DeadStockReport = ({ data, formatPrice }) => {
+const DeadStockReport = ({ data, formatPrice, formatDate }) => {
   if (!data) return <EmptyReport message="Click Refresh to load dead stock report" />;
   if (!Array.isArray(data) || data.length === 0) return <EmptyReport message="No dead stock items found" icon={Clock} />;
 

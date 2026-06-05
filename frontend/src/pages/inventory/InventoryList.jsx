@@ -223,7 +223,7 @@ const InventoryList = () => {
   // Render loading skeleton
   if (loading && items.length === 0) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 animate-fade-in">
         <div className="page-header">
           <div>
             <div className="skeleton h-8 w-40 mb-2" />
@@ -260,7 +260,7 @@ const InventoryList = () => {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 animate-fade-in">
       {/* Header */}
       <div className="page-header">
         <div>
@@ -466,7 +466,7 @@ const InventoryList = () => {
       {/* Error state */}
       {error && (
         <div className="card border-red-200 dark:border-red-800">
-          <div className="p-6 text-center">
+          <div className="p-4 text-center">
             <AlertTriangle size={40} className="mx-auto mb-3 text-red-400" />
             <h3 className="text-lg font-semibold text-red-600 dark:text-red-400 mb-1">Failed to Load</h3>
             <p className="text-sm text-slate-500 mb-4">{error}</p>
@@ -741,13 +741,13 @@ const InventoryList = () => {
       {importModal && (
         <div className="modal-overlay" onClick={() => setImportModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700">
               <h2 className="text-lg font-semibold">{t('inventory.import')}</h2>
               <button onClick={() => setImportModal(false)} className="btn-ghost p-2">
                 <X size={20} />
               </button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="p-4 space-y-4">
               <p className="text-sm text-slate-500">
                 Upload an Excel file (.xlsx) to bulk import items. Download the template first for the correct format.
               </p>

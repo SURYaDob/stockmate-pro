@@ -92,7 +92,7 @@ const SupplierLedger = () => {
   // Loading
   if (loading && ledger.length === 0) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 animate-fade-in">
         <div className="flex items-center gap-4">
           <div className="skeleton h-10 w-10 rounded-lg" />
           <div>
@@ -108,7 +108,7 @@ const SupplierLedger = () => {
             </div>
           ))}
         </div>
-        <div className="card p-6 space-y-4">
+        <div className="card p-4 space-y-4">
           {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
             <div key={i} className="flex gap-4">
               <div className="skeleton h-10 w-10 rounded-lg" />
@@ -126,7 +126,7 @@ const SupplierLedger = () => {
   // Error
   if (error && !supplier) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 animate-fade-in">
         <div className="flex items-center gap-4">
           <Link to="/suppliers" className="btn-ghost p-2">
             <ArrowLeft size={20} />
@@ -152,7 +152,7 @@ const SupplierLedger = () => {
   const filterActive = typeFilter || startDate || endDate;
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">

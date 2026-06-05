@@ -140,7 +140,7 @@ const Landing = () => {
         <div className="absolute top-[-20%] left-[-10%] w-[40%] h-[40%] rounded-full bg-amber-400/10 blur-3xl" />
         <div className="absolute bottom-[-10%] right-[-5%] w-[30%] h-[30%] rounded-full bg-slate-400/10 blur-3xl" />
 
-        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-24">
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-14">
           {/* Logout button */}
           <div className="absolute top-4 right-4 sm:top-6 sm:right-6 lg:top-8 lg:right-8">
             <button
@@ -151,8 +151,8 @@ const Landing = () => {
             </button>
           </div>
           {/* Brand */}
-          <div className="text-center mb-12 lg:mb-20">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-accent-500/10 mb-6">
+          <div className="text-center mb-8 lg:mb-12">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent-500/10 mb-4">
               <Warehouse size={32} className="text-accent-500" strokeWidth={1.5} />
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-800 dark:text-slate-100 mb-4 tracking-tight">
@@ -176,7 +176,7 @@ const Landing = () => {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-4">
               {categories.map((cat, index) => (
                 <CategoryTile
                   key={cat.id}
@@ -189,7 +189,7 @@ const Landing = () => {
           </div>
 
           {/* CTA Button */}
-          <div className="text-center mt-10">
+          <div className="text-center mt-6">
             <button
               onClick={() => navigate('/dashboard')}
               className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-accent-500 text-white font-semibold text-base shadow-lg shadow-accent-500/20 hover:shadow-xl hover:shadow-accent-500/30 hover:bg-accent-600 transition-all duration-200 active:scale-[0.97]"
@@ -201,7 +201,7 @@ const Landing = () => {
           </div>
 
           {/* Feature Pills */}
-          <div className="text-center mt-10">
+          <div className="text-center mt-6">
             <div className="flex flex-wrap items-center justify-center gap-3">
               {['GST Billing', 'Low Stock Alerts', 'Multi-branch', 'Excel Import', 'Offline Mode', 'Desktop App'].map((feature) => (
                 <span
@@ -223,7 +223,7 @@ const Landing = () => {
             <p className="text-xs text-slate-400">
               &copy; {new Date().getFullYear()} StockMate Pro. All rights reserved.
             </p>
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4">
               <a href="#" className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">Privacy Policy</a>
               <a href="#" className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">Terms of Service</a>
               <a href="#" className="text-xs text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">Help</a>

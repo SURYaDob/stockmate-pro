@@ -131,7 +131,7 @@ const InventoryDetail = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 animate-fade-in">
         <div className="flex items-center gap-4">
           <div className="skeleton h-10 w-10 rounded-lg" />
           <div>
@@ -139,9 +139,9 @@ const InventoryDetail = () => {
             <div className="skeleton h-4 w-40" />
           </div>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2">
-            <div className="card p-6 space-y-4">
+            <div className="card p-4 space-y-4">
               {[1, 2, 3, 4, 5, 6].map(i => (
                 <div key={i} className="flex justify-between">
                   <div className="skeleton h-4 w-24" />
@@ -150,7 +150,7 @@ const InventoryDetail = () => {
               ))}
             </div>
           </div>
-          <div className="card p-6 space-y-4">
+          <div className="card p-4 space-y-4">
             {[1, 2, 3].map(i => (
               <div key={i} className="skeleton h-24 w-full rounded-lg" />
             ))}
@@ -163,7 +163,7 @@ const InventoryDetail = () => {
   // Error state
   if (error) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 animate-fade-in">
         <div className="flex items-center gap-4">
           <Link to="/inventory" className="btn-ghost p-2">
             <ArrowLeft size={20} />
@@ -196,7 +196,7 @@ const InventoryDetail = () => {
   const displayedMovements = showAllMovements ? stockMovements : stockMovements.slice(0, 10);
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
@@ -237,12 +237,12 @@ const InventoryDetail = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Main info */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4">
           {/* Stock & Price Card */}
           <div className="card">
-            <div className="p-6">
+            <div className="p-4">
               {/* Stock level bar */}
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-2">
@@ -420,7 +420,7 @@ const InventoryDetail = () => {
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Quick Actions */}
           <div className="card">
             <div className="card-header">
@@ -542,13 +542,13 @@ const InventoryDetail = () => {
       {adjustModal && (
         <div className="modal-overlay" onClick={() => setAdjustModal(false)}>
           <div className="modal-content max-w-md" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700">
               <h2 className="text-lg font-semibold">Adjust Stock</h2>
               <button onClick={() => setAdjustModal(false)} className="btn-ghost p-2">
                 <X size={20} />
               </button>
             </div>
-            <form onSubmit={handleAdjustStock} className="p-6 space-y-5">
+            <form onSubmit={handleAdjustStock} className="p-5 space-y-5">
               {item && (
                 <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50">
                   <p className="text-sm font-medium text-slate-700 dark:text-slate-300">Current Stock</p>
@@ -623,7 +623,7 @@ const InventoryDetail = () => {
       {confirmArchive && (
         <div className="modal-overlay" onClick={() => setConfirmArchive(false)}>
           <div className="modal-content max-w-sm" onClick={e => e.stopPropagation()}>
-            <div className="p-6 text-center">
+            <div className="p-4 text-center">
               <div className="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center mx-auto mb-4">
                 <Archive size={24} className="text-red-500" />
               </div>

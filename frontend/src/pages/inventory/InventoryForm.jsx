@@ -178,7 +178,7 @@ const InventoryForm = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 animate-fade-in">
         <div className="flex items-center gap-4">
           <div className="skeleton h-10 w-10 rounded-lg" />
           <div>
@@ -186,8 +186,8 @@ const InventoryForm = () => {
             <div className="skeleton h-4 w-32" />
           </div>
         </div>
-        <div className="card p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="card p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[1, 2, 3, 4, 5, 6].map(i => (
               <div key={i}>
                 <div className="skeleton h-4 w-24 mb-2" />
@@ -203,7 +203,7 @@ const InventoryForm = () => {
   // Error state
   if (fetchError) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 animate-fade-in">
         <div className="flex items-center gap-4">
           <Link to="/inventory" className="btn-ghost p-2">
             <ArrowLeft size={20} />
@@ -225,7 +225,7 @@ const InventoryForm = () => {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in max-w-4xl">
+    <div className="space-y-4 animate-fade-in max-w-4xl">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link to={isEdit ? `/inventory/${id}` : '/inventory'} className="btn-ghost p-2">
@@ -253,7 +253,7 @@ const InventoryForm = () => {
       )}
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* Basic Information */}
         <div className="card">
           <div className="card-header">
@@ -561,7 +561,7 @@ const InventoryForm = () => {
           </div>
           <div className="card-body">
             {suppliers.length === 0 ? (
-              <div className="text-center py-6">
+              <div className="text-center py-4">
                 <p className="text-sm text-slate-400 mb-2">No suppliers available</p>
                 <Link to="/suppliers/new" className="text-sm text-accent-500 hover:text-accent-600">
                   Add suppliers first

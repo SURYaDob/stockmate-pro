@@ -92,11 +92,11 @@
   }
 
   .card-header {
-    @apply px-6 py-4 border-b border-slate-200 dark:border-slate-700;
+    @apply px-4 py-4 border-b border-slate-200 dark:border-slate-700;
   }
 
   .card-body {
-    @apply p-6;
+    @apply p-4;
   }
 
   .badge {
@@ -148,11 +148,11 @@
   }
 
   .page-container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4;
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2;
   }
 
   .page-header {
-    @apply flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4;
+    @apply flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3;
   }
 }
 

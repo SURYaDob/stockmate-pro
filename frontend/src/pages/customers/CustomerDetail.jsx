@@ -127,7 +127,7 @@ const CustomerDetail = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 animate-fade-in">
         <div className="flex items-center gap-4">
           <div className="skeleton h-10 w-10 rounded-lg" />
           <div>
@@ -135,9 +135,9 @@ const CustomerDetail = () => {
             <div className="skeleton h-4 w-40" />
           </div>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2">
-            <div className="card p-6 space-y-4">
+            <div className="card p-4 space-y-4">
               {[1, 2, 3, 4, 5, 6].map(i => (
                 <div key={i} className="flex justify-between">
                   <div className="skeleton h-4 w-24" />
@@ -146,7 +146,7 @@ const CustomerDetail = () => {
               ))}
             </div>
           </div>
-          <div className="card p-6 space-y-4">
+          <div className="card p-4 space-y-4">
             {[1, 2, 3].map(i => (
               <div key={i} className="skeleton h-24 w-full rounded-lg" />
             ))}
@@ -159,7 +159,7 @@ const CustomerDetail = () => {
   // Error state
   if (error) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 animate-fade-in">
         <div className="flex items-center gap-4">
           <Link to="/customers" className="btn-ghost p-2">
             <ArrowLeft size={20} />
@@ -186,7 +186,7 @@ const CustomerDetail = () => {
   const sales = customer.sales || [];
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
@@ -236,12 +236,12 @@ const CustomerDetail = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Main content */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4">
           {/* Financial summary */}
           <div className="card">
-            <div className="p-6">
+            <div className="p-4">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20">
                   <p className="text-xs font-medium text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-1">Outstanding</p>
@@ -436,7 +436,7 @@ const CustomerDetail = () => {
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Quick Actions */}
           <div className="card">
             <div className="card-header">
@@ -534,13 +534,13 @@ const CustomerDetail = () => {
       {showPaymentModal && (
         <div className="modal-overlay" onClick={() => setShowPaymentModal(false)}>
           <div className="modal-content max-w-sm" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700">
               <h2 className="text-lg font-semibold">Record Payment</h2>
               <button onClick={() => setShowPaymentModal(false)} className="btn-ghost p-2">
                 <X size={20} />
               </button>
             </div>
-            <form onSubmit={handleRecordPayment} className="p-6 space-y-5">
+            <form onSubmit={handleRecordPayment} className="p-5 space-y-5">
               <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50 flex items-center justify-between">
                 <span className="text-sm text-slate-600 dark:text-slate-400">Outstanding Balance</span>
                 <span className="text-lg font-bold font-mono text-amber-600 dark:text-amber-400">
@@ -618,13 +618,13 @@ const CustomerDetail = () => {
       {showCreditModal && (
         <div className="modal-overlay" onClick={() => setShowCreditModal(false)}>
           <div className="modal-content max-w-sm" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700">
               <h2 className="text-lg font-semibold">Issue Credit Note</h2>
               <button onClick={() => setShowCreditModal(false)} className="btn-ghost p-2">
                 <X size={20} />
               </button>
             </div>
-            <form onSubmit={handleCreateCreditNote} className="p-6 space-y-5">
+            <form onSubmit={handleCreateCreditNote} className="p-5 space-y-5">
               <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50 flex items-center justify-between">
                 <span className="text-sm text-slate-600 dark:text-slate-400">Outstanding Balance</span>
                 <span className="text-lg font-bold font-mono text-amber-600 dark:text-amber-400">

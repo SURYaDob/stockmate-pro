@@ -127,7 +127,7 @@ const Settings = () => {
 
   if (loading) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 animate-fade-in">
         <div className="page-header">
           <div>
             <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Settings</h1>
@@ -144,7 +144,7 @@ const Settings = () => {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 animate-fade-in">
       <div className="page-header">
         <div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Settings</h1>
@@ -182,7 +182,7 @@ const Settings = () => {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="card-body space-y-6">
+          <form onSubmit={handleSubmit} className="card-body space-y-4">
             {error && (
               <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-sm text-red-600 dark:text-red-400">
                 <AlertTriangle size={16} />

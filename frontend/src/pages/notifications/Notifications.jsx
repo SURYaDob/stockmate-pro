@@ -181,7 +181,7 @@ const Notifications = () => {
     : notifications;
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 animate-fade-in">
       {/* Header */}
       <div className="page-header">
         <div>
@@ -352,7 +352,7 @@ const Notifications = () => {
       {showPrefs && (
         <div className="modal-overlay" onClick={() => setShowPrefs(false)}>
           <div className="modal-content max-w-md" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 dark:border-slate-700">
               <div className="flex items-center gap-2">
                 <Bell size={18} className="text-slate-500" />
                 <h2 className="text-lg font-semibold">Notification Preferences</h2>
@@ -362,7 +362,7 @@ const Notifications = () => {
               </button>
             </div>
 
-            <form onSubmit={handleSavePrefs} className="p-6 space-y-6">
+            <form onSubmit={handleSavePrefs} className="p-4 space-y-4">
               {/* Notification Types */}
               <div>
                 <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Alert Types</h3>

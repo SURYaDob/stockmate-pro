@@ -123,7 +123,7 @@ const CustomerForm = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 animate-fade-in">
         <div className="flex items-center gap-4">
           <div className="skeleton h-10 w-10 rounded-lg" />
           <div>
@@ -131,8 +131,8 @@ const CustomerForm = () => {
             <div className="skeleton h-4 w-32" />
           </div>
         </div>
-        <div className="card p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="card p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[1, 2, 3, 4, 5, 6].map(i => (
               <div key={i}>
                 <div className="skeleton h-4 w-24 mb-2" />
@@ -148,7 +148,7 @@ const CustomerForm = () => {
   // Error state
   if (fetchError) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 animate-fade-in">
         <div className="flex items-center gap-4">
           <Link to="/customers" className="btn-ghost p-2">
             <ArrowLeft size={20} />
@@ -170,7 +170,7 @@ const CustomerForm = () => {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in max-w-4xl">
+    <div className="space-y-4 animate-fade-in max-w-4xl">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link to={isEdit ? `/customers/${id}` : '/customers'} className="btn-ghost p-2">
@@ -198,7 +198,7 @@ const CustomerForm = () => {
       )}
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
         {/* Basic Information */}
         <div className="card">
           <div className="card-header">

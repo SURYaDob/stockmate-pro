@@ -98,7 +98,7 @@ const Dashboard = () => {
   const isLoading = loading && !summary;
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 animate-fade-in">
       {/* Header */}
       <div className="page-header">
         <div>
@@ -161,7 +161,7 @@ const Dashboard = () => {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Monthly Sales Chart */}
         <div className="card p-5">
           <div className="flex items-center justify-between mb-5">

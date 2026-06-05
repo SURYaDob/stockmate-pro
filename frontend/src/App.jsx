@@ -71,13 +71,13 @@ function App() {
           </Route>
 
           {/* Category selection - only for authenticated users */}
-          <Route element={<AuthLayout />}>
-            <Route path="/" element={
-              <ProtectedRoute>
+          <Route path="/" element={
+            <ProtectedRoute>
+              <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-primary-900 dark:to-primary-800">
                 <Landing />
-              </ProtectedRoute>
-            } />
-          </Route>
+              </div>
+            </ProtectedRoute>
+          } />
 
           {/* Protected routes */}
           <Route

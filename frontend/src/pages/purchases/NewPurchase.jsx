@@ -236,7 +236,7 @@ const NewPurchase = () => {
   }, []);
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-4 animate-fade-in">
       {/* Header */}
       <div className="flex items-center gap-4">
         <Link to="/purchases" className="btn-ghost p-2">
@@ -266,9 +266,9 @@ const NewPurchase = () => {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Main - Line items */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-4">
           {/* Supplier selection */}
           <div className="card">
             <div className="card-header">
@@ -550,7 +550,7 @@ const NewPurchase = () => {
         </div>
 
         {/* Sidebar - Payment & Summary */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* PO Summary */}
           <div className="card">
             <div className="card-header">

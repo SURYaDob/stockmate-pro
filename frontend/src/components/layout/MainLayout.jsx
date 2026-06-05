@@ -162,9 +162,9 @@ const MainLayout = ({ children }) => {
       </aside>
 
       {/* Main content area */}
-      <main className="lg:ml-64 pt-16 lg:pt-0 pb-20 lg:pb-0 min-h-screen">
+      <main className="lg:ml-64 pt-14 lg:pt-0 pb-20 lg:pb-0 min-h-screen">
         {/* Desktop header */}
-        <div className="hidden lg:flex items-center justify-end px-6 py-3 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 sticky top-0 z-20">
+        <div className="hidden lg:flex items-center justify-end px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 sticky top-0 z-20">
           <div className="flex items-center gap-2">
             <span className="text-xs text-slate-400">{user?.firstName} {user?.lastName}</span>
             <div className="relative">

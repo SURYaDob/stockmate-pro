@@ -53,6 +53,7 @@ app.use(cors({
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 20,
+  skip: () => process.env.NODE_ENV === 'test', // Skip rate limiting in test mode
   message: { success: false, message: 'Too many attempts, please try again later.' },
   standardHeaders: true,
   legacyHeaders: false,

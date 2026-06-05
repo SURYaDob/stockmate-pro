@@ -7,6 +7,20 @@ process.env.JWT_REFRESH_EXPIRY = '7d';
 process.env.FRONTEND_URL = 'http://localhost:3000';
 process.env.PORT = '0'; // random port to avoid conflicts
 
+// ── Mock bcrypt (avoid actual hashing in tests) ──
+jest.mock('bcryptjs', () => ({
+  compare: jest.fn().mockImplementation((password, hash) => {
+    // If the hash contains the password, return true (for valid credentials)
+    // Otherwise return false (for wrong passwords)
+    // The mock hash "$2a$12$mockhashedpassword" maps to password "Admin@123"
+    if (hash === '$2a$12$mockhashedpassword' && password === 'Admin@123') {
+      return Promise.resolve(true);
+    }
+    return Promise.resolve(false);
+  }),
+  hash: jest.fn().mockResolvedValue('$2a$12$mockedhashedresult'),
+}));
+
 // ── Mock jsonwebtoken ──
 jest.mock('jsonwebtoken', () => ({
   verify: jest.fn().mockReturnValue({

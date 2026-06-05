@@ -64,7 +64,7 @@ const getById = catchAsync(async (req, res) => {
 });
 
 const create = catchAsync(async (req, res) => {
-  const { supplierId, items, expectedDate, notes, branchId } = req.body;
+  const { supplierId, items, expectedDate, notes, branchId, paidAmount, paymentMethod, discountType, discountValue } = req.body;
   const targetBranchId = branchId || req.branchId;
 
   if (!items?.length) throw new AppError('At least one item is required', 400);
@@ -73,6 +73,7 @@ const create = catchAsync(async (req, res) => {
   let subtotal = 0;
   let gstTotal = 0;
   let grandTotal = 0;
+  let discountTotal = 0;
 
   const purchaseItems = [];
   for (const item of items) {
@@ -80,7 +81,14 @@ const create = catchAsync(async (req, res) => {
     if (!inventory) throw new AppError(`Item not found: ${item.itemId}`, 404);
 
     const qty = parseInt(item.quantity);
-    const unitPrice = Math.round((item.unitPrice || inventory.purchasePrice) * 100);
+    // unitPrice comes from frontend in rupees (e.g., 18.50).
+    // If not provided, use inventory.purchasePrice which is already in paise.
+    let unitPrice;
+    if (item.unitPrice != null && item.unitPrice !== '') {
+      unitPrice = Math.round(parseFloat(item.unitPrice) * 100);
+    } else {
+      unitPrice = inventory.purchasePrice;
+    }
     const lineTotal = unitPrice * qty;
     const gstPercent = parseInt((item.gstRate || inventory.gstRate).replace('RATE_', ''));
     const gstAmount = Math.round(lineTotal * gstPercent / 100);
@@ -99,6 +107,18 @@ const create = catchAsync(async (req, res) => {
     });
   }
 
+  // Apply overall discount
+  if (discountType && discountValue) {
+    if (discountType === 'PERCENTAGE') {
+      discountTotal = Math.round(subtotal * parseFloat(discountValue) / 100);
+    } else if (discountType === 'FLAT') {
+      discountTotal = Math.round(parseFloat(discountValue) * 100);
+    }
+  }
+
+  grandTotal = grandTotal - discountTotal;
+  const initialPaid = paidAmount ? Math.round(parseFloat(paidAmount)) : 0;
+
   const purchase = await prisma.purchase.create({
     data: {
       poNumber,
@@ -109,9 +129,15 @@ const create = catchAsync(async (req, res) => {
       expectedDate: expectedDate ? new Date(expectedDate) : null,
       status: 'ORDERED',
       subtotal,
+      discountTotal,
       gstTotal,
       grandTotal,
-      balanceAmount: grandTotal,
+      paidAmount: initialPaid,
+      balanceAmount: grandTotal - initialPaid,
+      paymentStatus: initialPaid >= grandTotal ? 'PAID' : initialPaid > 0 ? 'PARTIAL' : 'PENDING',
+      paymentMethod: paymentMethod || null,
+      discountType: discountType || null,
+      discountValue: discountValue ? Math.round(parseFloat(discountValue)) : null,
       notes,
       items: { create: purchaseItems },
     },
@@ -133,9 +159,21 @@ const create = catchAsync(async (req, res) => {
       referenceId: purchase.id,
     },
   });
+  if (initialPaid > 0) {
+    await prisma.supplierLedger.create({
+      data: {
+        supplierId,
+        type: 'PAYMENT',
+        amount: -initialPaid,
+        balance: (lastEntry?.balance || 0) + grandTotal - initialPaid,
+        description: `Payment for ${purchase.poNumber}`,
+        referenceId: purchase.id,
+      },
+    });
+  }
   await prisma.supplier.update({
     where: { id: supplierId },
-    data: { outstanding: { increment: grandTotal } },
+    data: { outstanding: { increment: grandTotal - initialPaid } },
   });
 
   await prisma.auditLog.create({
@@ -144,7 +182,7 @@ const create = catchAsync(async (req, res) => {
       action: 'CREATE',
       entity: 'Purchase',
       entityId: purchase.id,
-      newValue: JSON.stringify({ poNumber, grandTotal }),
+      newValue: JSON.stringify({ poNumber, grandTotal, paidAmount: initialPaid, discountTotal }),
     },
   });
 
@@ -295,6 +333,7 @@ const recordPayment = catchAsync(async (req, res) => {
       paidAmount: newPaid,
       balanceAmount: newBalance,
       paymentStatus: newBalance <= 0 ? 'PAID' : 'PARTIAL',
+      paymentMethod: paymentMethod || purchase.paymentMethod,
     },
   });
 
